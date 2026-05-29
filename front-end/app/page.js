@@ -1,7 +1,10 @@
+import SectionOne from "./Component/Layout/SectionOne";
+
 export default function Home() {
   return (
     <div>
-      Home
+      {/* Section One: LayoutOne */}
+      <SectionOne />
     </div>
   )
 }
