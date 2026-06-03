@@ -1,7 +1,12 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+export const {
+  handlers,
+  signIn,
+  signOut,
+  auth,
+} = NextAuth({
   providers: [
     Credentials({
       credentials: {
@@ -10,11 +15,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
 
       async authorize(credentials) {
-        return {
-          id: "1",
-          email: credentials.email,
-          name: "Demo User",
-        };
+
+        // temporary demo auth
+
+        if (
+          credentials.email &&
+          credentials.password
+        ) {
+          return {
+            id: "1",
+            name: "Vendor",
+            email: credentials.email,
+          };
+        }
+
+        return null;
       },
     }),
   ],
@@ -22,4 +37,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: {
     signIn: "/sign_in",
   },
+
+  session: {
+    strategy: "jwt",
+  },
+
+  secret: process.env.AUTH_SECRET,
 });
