@@ -1,6 +1,8 @@
 import Footer from "./Component/SectionOne/Footer"
 import NavBar from "./Component/SectionOne/NavBar";
 
+import SessionWrapper from "./Component/essentials/SessionWrapper";
+
 import "./globals.css";
 
 export const metadata = {
@@ -12,9 +14,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <NavBar />
-        {children}
-        <Footer />
+        <SessionWrapper>
+          <NavBar />
+          {children}
+          <Footer />
+        </SessionWrapper>
       </body>
     </html>
   );
