@@ -8,24 +8,24 @@ export default function NavBar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navLinks = [
-    { name: "Home", href: "#" },
-    { name: "About Us", href: "#" },
-    { name: "Exhibitions", href: "#" },
-    { name: "Vendors", href: "#" },
-    { name: "Gallery", href: "#" },
-    { name: "Testimonials", href: "#" },
-    { name: "Contact", href: "#" },
+    { name: "Home", href: "/" },
+    { name: "About Us", href: "/about" },
+    { name: "Exhibitions", href: "/exhibitions" },
+    { name: "Vendors", href: "/vendors" },
+    { name: "Gallery", href: "/gallery" },
+    { name: "Testimonials", href: "/testimonials" },
+    { name: "Contact", href: "/contact" },
   ];
 
   return (
     <header className="w-full bg-white shadow-sm sticky top-0 z-50">
       <nav className="max-w-7xl mx-auto flex items-center justify-between px-5 md:px-8 py-4">
-
+        
         {/* Logo */}
         <Link href="/">
           <Image
             src="/rm_logo.png"
-            alt="RangManch Logo"
+            alt="Rang Manch Logo"
             width={120}
             height={60}
             priority
@@ -33,17 +33,13 @@ export default function NavBar() {
           />
         </Link>
 
-        {/* Desktop Menu */}
+        {/* Desktop Navigation */}
         <ul className="hidden lg:flex items-center gap-8 text-[15px] font-medium text-gray-700">
-          {navLinks.map((link, index) => (
-            <li key={index}>
+          {navLinks.map((link) => (
+            <li key={link.name}>
               <Link
                 href={link.href}
-                className={`hover:text-pink-600 transition-all duration-300 ${
-                  link.name === "Home"
-                    ? "text-pink-600 border-b-2 border-pink-600 pb-1"
-                    : ""
-                }`}
+                className="hover:text-pink-600 transition-all duration-300"
               >
                 {link.name}
               </Link>
@@ -51,10 +47,10 @@ export default function NavBar() {
           ))}
         </ul>
 
-        {/* Desktop Button */}
+        {/* Desktop CTA */}
         <Link
-          href="#"
-          className="hidden lg:flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium bg-gradient-to-r from-pink-500 to-purple-600 hover:scale-105 transition-all duration-300"
+          href="/sign_up"
+          className="hidden lg:flex items-center gap-2 px-6 py-3 rounded-xl text-white font-medium bg-gradient-to-r from-pink-500 to-purple-600 hover:scale-105 transition-all duration-300 shadow-lg"
         >
           Book a Stall →
         </Link>
@@ -73,12 +69,12 @@ export default function NavBar() {
       {/* Mobile Menu */}
       <div
         className={`lg:hidden bg-white overflow-hidden transition-all duration-300 ${
-          menuOpen ? "max-h-[500px]" : "max-h-0"
+          menuOpen ? "max-h-[600px]" : "max-h-0"
         }`}
       >
         <ul className="flex flex-col px-5 py-3">
-          {navLinks.map((link, index) => (
-            <li key={index}>
+          {navLinks.map((link) => (
+            <li key={link.name}>
               <Link
                 href={link.href}
                 onClick={() => setMenuOpen(false)}
@@ -89,9 +85,11 @@ export default function NavBar() {
             </li>
           ))}
 
+          {/* Mobile CTA */}
           <Link
-            href="#"
-            className="mt-4 text-center px-5 py-3 rounded-lg text-white font-medium bg-gradient-to-r from-pink-500 to-purple-600"
+            href="/sign_up"
+            onClick={() => setMenuOpen(false)}
+            className="mt-4 text-center px-5 py-3 rounded-xl text-white font-medium bg-gradient-to-r from-pink-500 to-purple-600"
           >
             Book a Stall →
           </Link>
