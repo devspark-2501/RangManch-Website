@@ -2,9 +2,13 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 import { FaStore } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
 
 export default function SignUp() {
+  const [loading, setLoading] = useState(false);
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -14,18 +18,25 @@ export default function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(form);
+    try {
+      setLoading(true);
 
-    // Later MongoDB API call
+      console.log(form);
 
-    alert("Account Created Successfully");
+      // register api later
+
+      alert("Registration API will be connected later.");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#fdf9f7] flex items-center justify-center px-5 py-10">
       <div className="w-full max-w-5xl bg-white rounded-3xl shadow-xl overflow-hidden grid md:grid-cols-2">
 
-        {/* LEFT */}
         <div className="hidden md:flex flex-col justify-center bg-gradient-to-br from-pink-500 to-purple-600 p-10 text-white">
 
           <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center text-4xl mb-6">
@@ -37,8 +48,7 @@ export default function SignUp() {
           </h1>
 
           <p className="text-white/90 leading-relaxed">
-            Join Rang Manch and showcase your products in premium exhibitions
-            attended by thousands of shoppers.
+            Join Rang Manch and showcase your products in premium exhibitions attended by thousands of shoppers.
           </p>
 
           <div className="mt-8 space-y-3">
@@ -47,9 +57,9 @@ export default function SignUp() {
             <p>✓ Quality Leads</p>
             <p>✓ Higher Sales Potential</p>
           </div>
+
         </div>
 
-        {/* RIGHT */}
         <div className="p-8 md:p-12">
 
           <div className="mb-8">
@@ -116,12 +126,32 @@ export default function SignUp() {
             </div>
 
             <button
+              disabled={loading}
               type="submit"
               className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold hover:scale-[1.02] transition"
             >
-              Create Vendor Account
+              {loading ? "Creating Account..." : "Create Vendor Account"}
             </button>
+
           </form>
+
+          <div className="my-6 flex items-center">
+            <div className="flex-1 border-t"></div>
+            <span className="px-4 text-sm text-gray-500">OR</span>
+            <div className="flex-1 border-t"></div>
+          </div>
+
+          <button
+            onClick={() =>
+              signIn("google", {
+                callbackUrl: "/book-stall",
+              })
+            }
+            className="w-full py-3 border rounded-xl flex items-center justify-center gap-3 hover:bg-gray-50 transition"
+          >
+            <FcGoogle size={22} />
+            Continue with Google
+          </button>
 
           <p className="text-center mt-6 text-gray-500">
             Already have an account?{" "}
@@ -132,6 +162,7 @@ export default function SignUp() {
               Sign In
             </Link>
           </p>
+
         </div>
       </div>
     </div>
