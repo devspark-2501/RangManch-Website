@@ -1,5 +1,5 @@
 import NextAuth from "next-auth";
-import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
 
 export const {
   handlers,
@@ -8,29 +8,9 @@ export const {
   auth,
 } = NextAuth({
   providers: [
-    Credentials({
-      credentials: {
-        email: {},
-        password: {},
-      },
-
-      async authorize(credentials) {
-
-        // temporary demo auth
-
-        if (
-          credentials.email &&
-          credentials.password
-        ) {
-          return {
-            id: "1",
-            name: "Vendor",
-            email: credentials.email,
-          };
-        }
-
-        return null;
-      },
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
     }),
   ],
 
