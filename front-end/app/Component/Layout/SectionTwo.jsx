@@ -155,13 +155,13 @@ export default function SectionTwo() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-10">
 
-          {[1, 2, 3, 4, 5].map((item) => (
+          {[5, 2, 7, 3, 9].map((item) => (
             <div
               key={item}
               className="group overflow-hidden rounded-2xl"
             >
               <img
-                src={`/gallery${item}.jpg`}
+                src={`/gallery${item}.jpeg`}
                 alt={`Gallery ${item}`}
                 className="w-full h-[220px] object-cover group-hover:scale-110 transition-transform duration-500"
               />
