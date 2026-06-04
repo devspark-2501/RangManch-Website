@@ -22,7 +22,7 @@ export default function About() {
 
       <div className="max-w-7xl mx-auto px-5 lg:px-8 py-20">
 
-        {/* MAIN CONTENT SPLIT */}
+        {/* MAIN CONTENT */}
         <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
 
           {/* TEXT */}
@@ -37,47 +37,48 @@ export default function About() {
               </span>{" "}
               is a community-driven exhibition platform dedicated to bringing
               local businesses, emerging brands, artisans, and entrepreneurs
-              closer to their customers. We organize curated exhibitions every
-              weekend in residential societies across Jaipur.
+              closer to their customers.
             </p>
 
             <p>
-              Our vision is to provide small and growing businesses with an
-              accessible platform to showcase their products, build brand
-              awareness, and connect directly with families and residents.
+              We organize curated exhibitions every weekend in residential
+              societies across Jaipur, creating vibrant shopping experiences.
             </p>
 
             <p>
-              From fashion, jewelry, and home décor to lifestyle products, food,
-              and handcrafted creations — Rang Manch offers a diverse and
-              exciting marketplace.
+              From fashion, jewelry, home décor to food and handcrafted
+              creations — Rang Manch offers a diverse marketplace.
             </p>
 
             <p>
-              We create experiences where businesses grow and communities connect
-              through meaningful, vibrant exhibitions.
+              We create experiences where businesses grow and communities connect.
             </p>
           </div>
 
-          {/* IMAGE GRID */}
+          {/* IMAGE GRID ✅ FIXED */}
           <div className="grid grid-cols-2 gap-4">
             <img
-              src="/gallery1.jpg"
+              src="/gallery1.jpeg"
+              alt="Exhibition 1"
               className="rounded-2xl h-40 w-full object-cover hover:scale-105 transition"
             />
             <img
-              src="/gallery2.jpg"
+              src="/gallery2.jpeg"
+              alt="Exhibition 2"
               className="rounded-2xl h-60 w-full object-cover hover:scale-105 transition"
             />
             <img
-              src="/gallery3.jpg"
+              src="/gallery3.jpeg"
+              alt="Exhibition 3"
               className="rounded-2xl h-60 w-full object-cover hover:scale-105 transition"
             />
             <img
-              src="/gallery4.jpg"
+              src="/gallery4.jpeg"
+              alt="Exhibition 4"
               className="rounded-2xl h-40 w-full object-cover hover:scale-105 transition"
             />
           </div>
+
         </div>
 
         {/* VALUE CARDS */}
@@ -91,8 +92,7 @@ export default function About() {
               Community First
             </h3>
             <p className="text-gray-600 text-sm">
-              We bring people together through engaging local shopping
-              experiences.
+              We bring people together through engaging local experiences.
             </p>
           </div>
 
@@ -104,8 +104,7 @@ export default function About() {
               Empowering Brands
             </h3>
             <p className="text-gray-600 text-sm">
-              Helping small businesses grow with direct access to the right
-              audience.
+              Helping businesses grow with the right audience.
             </p>
           </div>
 
@@ -117,21 +116,19 @@ export default function About() {
               Memorable Experiences
             </h3>
             <p className="text-gray-600 text-sm">
-              Every exhibition is designed to be vibrant, engaging, and
-              enjoyable.
+              Vibrant exhibitions that people love to visit.
             </p>
           </div>
 
         </div>
 
-        {/* FINAL CTA */}
+        {/* CTA */}
         <div className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-3xl text-white p-10 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-3">
             Be a Part of Rang Manch
           </h2>
           <p className="opacity-90 mb-6 text-sm md:text-base">
-            Whether you're a brand or a shopper, experience something unique
-            every weekend.
+            Discover, shop, and connect every weekend.
           </p>
 
           <button className="bg-white text-pink-600 px-8 py-3 rounded-xl font-medium hover:scale-105 transition">
