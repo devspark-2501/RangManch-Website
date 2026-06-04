@@ -1,6 +1,8 @@
 import { FaUsers, FaStore, FaHeart } from "react-icons/fa";
 import { HiArrowRight } from "react-icons/hi";
 
+import Link from "next/link";
+
 export default function About() {
   return (
     <section className="bg-[#fdf9f7]">
@@ -15,9 +17,11 @@ export default function About() {
           exhibitions inside premium residential societies.
         </p>
 
-        <button className="mt-6 inline-flex items-center gap-2 bg-white text-pink-600 px-6 py-3 rounded-xl font-medium hover:scale-105 transition">
-          Explore Exhibitions <HiArrowRight />
-        </button>
+        <Link href="/exhibitions">
+          <button className="mt-6 inline-flex items-center gap-2 bg-white text-pink-600 px-6 py-3 rounded-xl font-medium hover:scale-105 transition">
+            Explore Exhibitions <HiArrowRight />
+          </button>
+        </Link>
       </div>
 
       <div className="max-w-7xl mx-auto px-5 lg:px-8 py-20">
