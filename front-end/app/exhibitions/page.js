@@ -1,4 +1,5 @@
 import Link from "next/link";
+
 import {
   FaMapMarkerAlt,
   FaCalendarAlt,
@@ -156,9 +157,12 @@ export default function Exhibitions() {
                 )}
 
                 {item.status === "expired" && (
-                  <button className="mt-6 w-full py-3 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition">
-                    View Gallery
-                  </button>
+                    <Link
+                        href={`/exhibitions/${item.id}`}
+                        className="mt-6 block text-center py-3 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition"
+                    >
+                        View Gallery
+                    </Link>
                 )}
 
               </div>
