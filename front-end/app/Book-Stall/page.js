@@ -7,6 +7,7 @@ import {
   FaEnvelope,
   FaInstagram,
   FaCheckCircle,
+  FaTimes,
 } from "react-icons/fa";
 
 export default function BookStall() {
@@ -22,13 +23,15 @@ export default function BookStall() {
     terms: false,
   });
 
+  const [showSuccess, setShowSuccess] = useState(false);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-
     console.log(form);
-
-    alert("Booking request submitted!");
+    setShowSuccess(true);
   };
+
+  const closeSuccess = () => setShowSuccess(false);
 
   return (
     <section className="min-h-screen bg-gradient-to-br from-[#fdf9f7] via-pink-50 to-purple-50 py-16">
@@ -254,6 +257,91 @@ export default function BookStall() {
             </div>
 
           </div>
+
+        </div>
+      </div>
+
+      {/* Backdrop */}
+      {showSuccess && (
+        <div
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+          onClick={closeSuccess}
+        />
+      )}
+
+      {/* Success Panel — slides in from right, swipeable via X */}
+      <div
+        className={`fixed top-0 right-0 h-full w-full max-w-sm z-50 bg-white shadow-2xl flex flex-col transition-transform duration-500 ease-in-out ${
+          showSuccess ? "translate-x-0" : "translate-x-full"
+        }`}
+        style={{ touchAction: "pan-y" }}
+      >
+        {/* Top gradient bar */}
+        <div className="h-2 w-full bg-gradient-to-r from-pink-500 to-purple-600" />
+
+        {/* Close button */}
+        <div className="flex justify-end px-6 pt-5">
+          <button
+            onClick={closeSuccess}
+            className="text-gray-400 hover:text-gray-600 transition p-1"
+            aria-label="Close"
+          >
+            <FaTimes size={20} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex flex-col items-center justify-center flex-1 px-8 pb-12 text-center">
+
+          {/* Animated checkmark circle */}
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center mb-6 shadow-lg">
+            <FaCheckCircle className="text-4xl text-pink-500" />
+          </div>
+
+          <h2 className="text-2xl font-bold text-[#1e2a55] mb-3 leading-snug">
+            Thank you for your interest in Rang Manch!
+          </h2>
+
+          <p className="text-gray-600 text-sm leading-relaxed mb-8">
+            Your stall booking request has been submitted successfully. Our team
+            will get in touch with you shortly to confirm availability and share
+            payment details.
+          </p>
+
+          <div className="w-full bg-pink-50 rounded-2xl p-5 space-y-3 text-left">
+
+            <a
+              href="tel:+918078681321"
+              className="flex items-center gap-3 text-[#1e2a55] font-medium hover:text-pink-600 transition"
+            >
+              <span className="w-9 h-9 rounded-full bg-white shadow flex items-center justify-center flex-shrink-0">
+                <FaPhone className="text-pink-500 text-sm" />
+              </span>
+              +91 8078681321
+            </a>
+
+            <a
+              href="mailto:rangmanchexhibition@gmail.com"
+              className="flex items-center gap-3 text-[#1e2a55] font-medium hover:text-pink-600 transition break-all"
+            >
+              <span className="w-9 h-9 rounded-full bg-white shadow flex items-center justify-center flex-shrink-0">
+                <FaEnvelope className="text-pink-500 text-sm" />
+              </span>
+              rangmanchexhibition@gmail.com
+            </a>
+
+          </div>
+
+          <button
+            onClick={closeSuccess}
+            className="mt-8 w-full py-3 rounded-2xl text-white font-semibold bg-gradient-to-r from-pink-500 to-purple-600 hover:scale-[1.01] transition"
+          >
+            Done
+          </button>
+
+          <p className="mt-4 text-xs text-gray-400">
+            Swipe right or tap ✕ to close
+          </p>
 
         </div>
       </div>
