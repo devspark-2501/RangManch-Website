@@ -16,22 +16,36 @@ export default function SignUp() {
   });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      console.log(form);
+    const res = await fetch("/api/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(form),
+    });
 
-      // register api later
+    const data = await res.json();
 
-      alert("Registration API will be connected later.");
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
+    if (!res.ok) {
+      alert(data.message);
+      return;
     }
-  };
+
+    alert("Account Created Successfully");
+
+    window.location.href = "/Book-Stall";
+  } catch (error) {
+    console.error(error);
+    alert("Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-[#fdf9f7] flex items-center justify-center px-5 py-10">
