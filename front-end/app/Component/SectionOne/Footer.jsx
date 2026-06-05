@@ -1,4 +1,8 @@
+"use client";
+
+import Link from "next/link";
 import Image from "next/image";
+
 import {
   FaInstagram,
   FaFacebookF,
@@ -41,11 +45,13 @@ export default function Footer() {
             </div>
 
             <div className="flex flex-col gap-3 w-full lg:w-auto">
-
+            
+            <Link href="/Book-Stall">
               <button className="px-8 py-3 rounded-lg text-white font-medium bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center gap-2 hover:scale-105 transition">
                 Book Your Stall Now
                 <HiArrowRight />
               </button>
+            </Link>
 
               <button className="flex items-center justify-center gap-2 text-green-600 font-medium">
                 <FaWhatsapp />

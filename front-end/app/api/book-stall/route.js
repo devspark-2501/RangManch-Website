@@ -5,18 +5,18 @@ export async function POST(req) {
   try {
     await connectDB();
 
-    const data = await req.json();
+    const body = await req.json();
 
     const booking = await Booking.create({
-      vendorName: data.vendorName,
-      businessName: data.businessName,
-      mobile: data.mobile,
-      email: data.email,
-      category: data.category,
-      products: data.products,
-      social: data.social,
-      extraTable: data.extraTable,
-      terms: data.terms,
+      vendorName: body.vendorName,
+      businessName: body.businessName,
+      mobile: body.mobile,
+      email: body.email,
+      category: body.category,
+      products: body.products,
+      social: body.social,
+      extraTable: body.extraTable,
+      terms: body.terms,
     });
 
     return Response.json(

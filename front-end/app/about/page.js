@@ -135,9 +135,11 @@ export default function About() {
             Discover, shop, and connect every weekend.
           </p>
 
+        <Link href="/Book-Stall">
           <button className="bg-white text-pink-600 px-8 py-3 rounded-xl font-medium hover:scale-105 transition">
             Join Now
           </button>
+        </Link>
         </div>
 
       </div>

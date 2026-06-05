@@ -25,11 +25,46 @@ export default function BookStall() {
 
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(form);
-    setShowSuccess(true);
-  };
+
+    try {
+        setLoading(true);
+
+        const response = await fetch("/api/book-stall", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+        throw new Error(data.message);
+        }
+
+        setShowSuccess(true);
+
+        setForm({
+        vendorName: "",
+        businessName: "",
+        mobile: "",
+        email: "",
+        category: "",
+        products: "",
+        social: "",
+        extraTable: "No",
+        terms: false,
+        });
+    } catch (error) {
+        console.error(error);
+        alert(error.message);
+    } finally {
+        setLoading(false);
+    }
+    };
 
   const closeSuccess = () => setShowSuccess(false);
 

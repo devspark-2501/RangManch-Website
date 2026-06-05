@@ -36,11 +36,13 @@ export default function Home() {
                 <button className="px-6 py-4 rounded-xl text-white font-semibold bg-gradient-to-r from-pink-500 to-purple-600 shadow-lg hover:scale-105 transition-all duration-300">
                   Upcoming Exhibitions
                 </button>
-              </Link>
+            </Link>
 
+            <Link href="/Book-Stall">
               <button className="px-6 py-4 rounded-xl border border-pink-300 text-pink-600 font-semibold hover:bg-pink-50 transition-all duration-300">
                 Book a Stall
               </button>
+            </Link>
 
             </div>
 
