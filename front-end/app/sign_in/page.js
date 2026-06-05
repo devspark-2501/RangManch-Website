@@ -34,7 +34,7 @@ export default function SignIn() {
         return;
       }
 
-      router.push("/book-stall");
+      router.push("/Book-Stall");
     } catch (error) {
       console.error(error);
       alert("Something went wrong");
