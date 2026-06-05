@@ -24,30 +24,39 @@ export default function BookStall() {
   });
 
   const [showSuccess, setShowSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e) => {
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-        setLoading(true);
+      setLoading(true);
 
-        const response = await fetch("/api/book-stall", {
+      const response = await fetch("/api/book-stall", {
         method: "POST",
         headers: {
-            "Content-Type": "application/json",
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(form),
-        });
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (!response.ok) {
+      if (!response.ok) {
         throw new Error(data.message);
-        }
+      }
 
-        setShowSuccess(true);
+      setShowSuccess(true);
 
-        setForm({
+      setForm({
         vendorName: "",
         businessName: "",
         mobile: "",
@@ -57,14 +66,14 @@ export default function BookStall() {
         social: "",
         extraTable: "No",
         terms: false,
-        });
+      });
     } catch (error) {
-        console.error(error);
-        alert(error.message);
+      console.error(error);
+      alert(error.message);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-    };
+  };
 
   const closeSuccess = () => setShowSuccess(false);
 
@@ -153,9 +162,11 @@ export default function BookStall() {
                     <label className="font-semibold text-[#1e2a55] block mb-2">
                       Vendor Name *
                     </label>
-
                     <input
                       type="text"
+                      name="vendorName"
+                      value={form.vendorName}
+                      onChange={handleChange}
                       required
                       className="w-full border border-gray-200 rounded-2xl px-5 py-4 focus:outline-none focus:border-pink-500"
                     />
@@ -165,9 +176,11 @@ export default function BookStall() {
                     <label className="font-semibold text-[#1e2a55] block mb-2">
                       Business Name *
                     </label>
-
                     <input
                       type="text"
+                      name="businessName"
+                      value={form.businessName}
+                      onChange={handleChange}
                       required
                       className="w-full border border-gray-200 rounded-2xl px-5 py-4 focus:outline-none focus:border-pink-500"
                     />
@@ -177,11 +190,13 @@ export default function BookStall() {
                     <label className="font-semibold text-[#1e2a55] block mb-2">
                       Mobile Number *
                     </label>
-
                     <div className="relative">
                       <FaPhone className="absolute left-4 top-5 text-gray-400" />
                       <input
                         type="text"
+                        name="mobile"
+                        value={form.mobile}
+                        onChange={handleChange}
                         required
                         className="w-full border border-gray-200 rounded-2xl pl-12 pr-5 py-4 focus:outline-none focus:border-pink-500"
                       />
@@ -192,11 +207,13 @@ export default function BookStall() {
                     <label className="font-semibold text-[#1e2a55] block mb-2">
                       Email Address *
                     </label>
-
                     <div className="relative">
                       <FaEnvelope className="absolute left-4 top-5 text-gray-400" />
                       <input
                         type="email"
+                        name="email"
+                        value={form.email}
+                        onChange={handleChange}
                         required
                         className="w-full border border-gray-200 rounded-2xl pl-12 pr-5 py-4 focus:outline-none focus:border-pink-500"
                       />
@@ -209,11 +226,14 @@ export default function BookStall() {
                   <label className="font-semibold text-[#1e2a55] block mb-2">
                     Product Category *
                   </label>
-
                   <select
+                    name="category"
+                    value={form.category}
+                    onChange={handleChange}
+                    required
                     className="w-full border border-gray-200 rounded-2xl px-5 py-4 focus:outline-none focus:border-pink-500"
                   >
-                    <option>Select Category</option>
+                    <option value="">Select Category</option>
                     <option>Clothing</option>
                     <option>Jewellery</option>
                     <option>Home Decor</option>
@@ -230,8 +250,10 @@ export default function BookStall() {
                   <label className="font-semibold text-[#1e2a55] block mb-2">
                     What Products Will You Showcase?
                   </label>
-
                   <textarea
+                    name="products"
+                    value={form.products}
+                    onChange={handleChange}
                     rows="5"
                     className="w-full border border-gray-200 rounded-2xl px-5 py-4 resize-none focus:outline-none focus:border-pink-500"
                   />
@@ -241,11 +263,13 @@ export default function BookStall() {
                   <label className="font-semibold text-[#1e2a55] block mb-2">
                     Instagram / Facebook Page
                   </label>
-
                   <div className="relative">
                     <FaInstagram className="absolute left-4 top-5 text-gray-400" />
                     <input
                       type="text"
+                      name="social"
+                      value={form.social}
+                      onChange={handleChange}
                       className="w-full border border-gray-200 rounded-2xl pl-12 pr-5 py-4 focus:outline-none focus:border-pink-500"
                     />
                   </div>
@@ -255,16 +279,29 @@ export default function BookStall() {
                   <label className="font-semibold text-[#1e2a55] block mb-4">
                     Extra Table Required?
                   </label>
-
                   <div className="grid grid-cols-2 gap-4">
 
-                    <label className="border rounded-2xl p-5 cursor-pointer hover:border-pink-500">
-                      <input type="radio" name="table" className="mr-2" />
+                    <label className={`border rounded-2xl p-5 cursor-pointer hover:border-pink-500 ${form.extraTable === "Yes" ? "border-pink-500 bg-pink-50" : ""}`}>
+                      <input
+                        type="radio"
+                        name="extraTable"
+                        value="Yes"
+                        checked={form.extraTable === "Yes"}
+                        onChange={handleChange}
+                        className="mr-2"
+                      />
                       Yes
                     </label>
 
-                    <label className="border rounded-2xl p-5 cursor-pointer hover:border-pink-500">
-                      <input type="radio" name="table" className="mr-2" defaultChecked />
+                    <label className={`border rounded-2xl p-5 cursor-pointer hover:border-pink-500 ${form.extraTable === "No" ? "border-pink-500 bg-pink-50" : ""}`}>
+                      <input
+                        type="radio"
+                        name="extraTable"
+                        value="No"
+                        checked={form.extraTable === "No"}
+                        onChange={handleChange}
+                        className="mr-2"
+                      />
                       No
                     </label>
 
@@ -272,8 +309,14 @@ export default function BookStall() {
                 </div>
 
                 <div className="mt-8">
-                  <label className="flex gap-3">
-                    <input type="checkbox" required />
+                  <label className="flex gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      name="terms"
+                      checked={form.terms}
+                      onChange={handleChange}
+                      required
+                    />
                     <span className="text-gray-700">
                       I agree to the exhibition terms and conditions.
                     </span>
@@ -282,9 +325,10 @@ export default function BookStall() {
 
                 <button
                   type="submit"
-                  className="w-full mt-8 py-4 rounded-2xl text-white font-semibold text-lg bg-gradient-to-r from-pink-500 to-purple-600 hover:scale-[1.01] transition"
+                  disabled={loading}
+                  className="w-full mt-8 py-4 rounded-2xl text-white font-semibold text-lg bg-gradient-to-r from-pink-500 to-purple-600 hover:scale-[1.01] transition disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
-                  Reserve My Stall
+                  {loading ? "Submitting..." : "Reserve My Stall"}
                 </button>
 
               </form>
@@ -304,7 +348,7 @@ export default function BookStall() {
         />
       )}
 
-      {/* Success Panel — slides in from right, swipeable via X */}
+      {/* Success Panel — slides in from right */}
       <div
         className={`fixed top-0 right-0 h-full w-full max-w-sm z-50 bg-white shadow-2xl flex flex-col transition-transform duration-500 ease-in-out ${
           showSuccess ? "translate-x-0" : "translate-x-full"
@@ -328,7 +372,6 @@ export default function BookStall() {
         {/* Content */}
         <div className="flex flex-col items-center justify-center flex-1 px-8 pb-12 text-center">
 
-          {/* Animated checkmark circle */}
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center mb-6 shadow-lg">
             <FaCheckCircle className="text-4xl text-pink-500" />
           </div>
