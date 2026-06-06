@@ -53,7 +53,7 @@ export default function NavBar() {
           <div className="hidden lg:flex items-center gap-4">
 
             <Link
-              href="/Book-Stall"
+              href="/Admin"
               className="px-5 py-3 rounded-xl text-white font-medium bg-gradient-to-r from-pink-500 to-purple-600"
             >
               Dashboard
