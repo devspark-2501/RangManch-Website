@@ -1,64 +1,66 @@
 import Link from "next/link";
+import { FaMapMarkerAlt, FaCalendarAlt, FaClock } from "react-icons/fa";
+import Exhibition from "@/models/Exhibition";
+import { connectDB } from "@/lib/mongodb";
 
-import {
-  FaMapMarkerAlt,
-  FaCalendarAlt,
-  FaClock,
-} from "react-icons/fa";
+const fallbackExhibitions = [
+  {
+    _id: "1",
+    title: "Rang Manch Summer Exhibition 2026",
+    location: "Kedia Kothi, Sirsi Road, Jaipur",
+    date: "31 May 2026",
+    time: "11:00 AM - 8:00 PM",
+    image: "/exhibition1.jpeg",
+    status: "expired",
+  },
+  {
+    _id: "2",
+    title: "Rang Manch Summer Exhibition 2026",
+    location: "SDC The Destination Gandhi Path West, Vaishali Nagar, Jaipur",
+    date: "7 June 2026",
+    time: "2:00 PM - 9:00 PM",
+    image: "/exhibition2.jpeg",
+    status: "coming-soon",
+  },
+];
 
-export default function Exhibitions() {
-  const exhibitions = [
-    {
-      id: 1,
-      title: "Rang Manch Summer Exhibition 2026",
-      location: "Kedia Kothi, Sirsi Road, Jaipur",
-      date: "31 May 2026",
-      time: "11:00 AM - 8:00 PM",
-      image: "/exhibition1.jpeg",
-      status: "expired",
-    },
+// Force dynamic rendering — disables Next.js full-route cache
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-    {
-      id: 2,
-      title: "Rang Manch Summer Exhibition 2026",
-      location:
-        "SDC The Destination Gandhi Path West, Vaishali Nagar, Jaipur",
-      date: "7 June 2026",
-      time: "2:00 PM - 9:00 PM",
-      image: "/exhibition2.jpeg",
-      status: "coming-soon",
-    },
+export default async function Exhibitions() {
+  let displayExhibitions = fallbackExhibitions;
 
-    // {
-    //   id: 3,
-    //   title: "Wedding & Lifestyle Expo",
-    //   location: "Location To Be Announced",
-    //   date: "Coming Soon",
-    //   time: "Coming Soon",
-    //   image: "/exhibition3.jpeg",
-    //   status: "coming-soon",
-    // },
+  try {
+    await connectDB();
 
-    // {
-    //   id: 4,
-    //   title: "Premium Home Decor Showcase",
-    //   location: "Location To Be Announced",
-    //   date: "Coming Soon",
-    //   time: "Coming Soon",
-    //   image: "/exhibition4.jpeg",
-    //   status: "coming-soon",
-    // },
+    console.log("=== [Exhibitions Page] DB connected ===");
 
-    // {
-    //   id: 5,
-    //   title: "Summer Shopping Carnival",
-    //   location: "Location To Be Announced",
-    //   date: "Coming Soon",
-    //   time: "Coming Soon",
-    //   image: "/exhibition5.jpeg",
-    //   status: "coming-soon",
-    // },
-  ];
+    const exhibitions = await Exhibition.find({})
+      .sort({ createdAt: -1 })
+      .lean();
+
+    console.log(`=== [Exhibitions Page] Raw count from DB: ${exhibitions.length} ===`);
+
+    if (exhibitions.length > 0) {
+      console.log("=== [Exhibitions Page] First doc sample:", JSON.stringify(exhibitions[0], null, 2));
+
+      const serializedExhibitions = exhibitions.map((item) => ({
+        ...item,
+        _id: item._id.toString(),
+        // Safely serialize any other ObjectId or Date fields
+        createdAt: item.createdAt ? item.createdAt.toString() : null,
+        updatedAt: item.updatedAt ? item.updatedAt.toString() : null,
+      }));
+
+      displayExhibitions = serializedExhibitions;
+      console.log(`=== [Exhibitions Page] Displaying ${serializedExhibitions.length} MongoDB exhibitions ===`);
+    } else {
+      console.log("=== [Exhibitions Page] No MongoDB exhibitions found — using fallback ===");
+    }
+  } catch (error) {
+    console.error("=== [Exhibitions Page] ERROR fetching exhibitions:", error);
+  }
 
   return (
     <section className="min-h-screen bg-[#fdf9f7] py-20">
@@ -80,9 +82,9 @@ export default function Exhibitions() {
         {/* Cards */}
         <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
 
-          {exhibitions.map((item) => (
+          {displayExhibitions.map((item) => (
             <div
-              key={item.id}
+              key={item._id}
               className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"
             >
               {/* Image */}
@@ -111,6 +113,7 @@ export default function Exhibitions() {
                     Event Completed
                   </div>
                 )}
+
               </div>
 
               {/* Content */}
@@ -143,7 +146,7 @@ export default function Exhibitions() {
 
                 {item.status === "open" && (
                   <Link
-                    href={`/exhibitions/${item.id}`}
+                    href={`/exhibitions/${item._id}`}
                     className="mt-6 block text-center py-3 rounded-xl text-white font-semibold bg-gradient-to-r from-pink-500 to-purple-600"
                   >
                     Explore More
@@ -157,17 +160,18 @@ export default function Exhibitions() {
                 )}
 
                 {item.status === "expired" && (
-                    <Link
-                        href={`/exhibitions/${item.id}`}
-                        className="mt-6 block text-center py-3 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition"
-                    >
-                        View Gallery
-                    </Link>
+                  <Link
+                    href={`/exhibitions/${item._id}`}
+                    className="mt-6 block text-center py-3 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition"
+                  >
+                    View Gallery
+                  </Link>
                 )}
 
               </div>
             </div>
           ))}
+
         </div>
       </div>
     </section>
