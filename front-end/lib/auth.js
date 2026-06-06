@@ -33,6 +33,15 @@ export const authOptions = {
             throw new Error("User not found");
           }
 
+          if (
+            user.password ===
+            "GOOGLE_AUTH_USER"
+          ) {
+            throw new Error(
+              "Please login using Google"
+            );
+          }
+
           const isPasswordCorrect =
             await bcrypt.compare(
               credentials.password,
@@ -40,13 +49,16 @@ export const authOptions = {
             );
 
           if (!isPasswordCorrect) {
-            throw new Error("Invalid password");
+            throw new Error(
+              "Invalid password"
+            );
           }
 
           return {
             id: user._id.toString(),
             name: user.name,
             email: user.email,
+            role: user.role,
           };
         } catch (error) {
           throw new Error(error.message);
@@ -64,7 +76,9 @@ export const authOptions = {
   callbacks: {
     async signIn({ user, account }) {
       try {
-        if (account.provider === "google") {
+        if (
+          account.provider === "google"
+        ) {
           await connectDB();
 
           const existingUser =
@@ -76,7 +90,14 @@ export const authOptions = {
             await User.create({
               name: user.name,
               email: user.email,
-              password: "GOOGLE_AUTH_USER",
+              password:
+                "GOOGLE_AUTH_USER",
+
+              role:
+                user.email ===
+                "rangmanchexhibition@gmail.com"
+                  ? "admin"
+                  : "user",
             });
           }
         }
@@ -88,16 +109,40 @@ export const authOptions = {
       }
     },
 
-    async session({ session }) {
-      await connectDB();
+    async jwt({ token }) {
+      try {
+        await connectDB();
 
-      const dbUser = await User.findOne({
-        email: session.user.email,
-      });
+        const dbUser =
+          await User.findOne({
+            email: token.email,
+          });
 
-      if (dbUser) {
+        if (dbUser) {
+          token.id =
+            dbUser._id.toString();
+
+          token.role =
+            dbUser.role;
+        }
+
+        return token;
+      } catch (error) {
+        console.error(error);
+        return token;
+      }
+    },
+
+    async session({
+      session,
+      token,
+    }) {
+      if (session?.user) {
         session.user.id =
-          dbUser._id.toString();
+          token.id;
+
+        session.user.role =
+          token.role;
       }
 
       return session;
