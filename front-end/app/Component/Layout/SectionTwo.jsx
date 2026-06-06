@@ -172,10 +172,12 @@ export default function SectionTwo() {
         </div>
 
         <div className="text-center">
-          <button className="inline-flex items-center gap-2 px-8 py-3 rounded-xl text-white font-medium bg-gradient-to-r from-pink-500 to-purple-600 hover:scale-105 transition">
-            View Full Gallery
-            <HiArrowRight />
-          </button>
+          <Link href="/Gallery">
+              <button className="inline-flex items-center gap-2 px-8 py-3 rounded-xl text-white font-medium bg-gradient-to-r from-pink-500 to-purple-600 hover:scale-105 transition">
+                View Full Gallery
+                <HiArrowRight />
+              </button>
+          </Link>
         </div>
 
       </div>
