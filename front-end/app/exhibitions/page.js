@@ -29,35 +29,35 @@ export default function Exhibitions() {
       status: "coming-soon",
     },
 
-    {
-      id: 3,
-      title: "Wedding & Lifestyle Expo",
-      location: "Location To Be Announced",
-      date: "Coming Soon",
-      time: "Coming Soon",
-      image: "/exhibition3.jpeg",
-      status: "coming-soon",
-    },
+    // {
+    //   id: 3,
+    //   title: "Wedding & Lifestyle Expo",
+    //   location: "Location To Be Announced",
+    //   date: "Coming Soon",
+    //   time: "Coming Soon",
+    //   image: "/exhibition3.jpeg",
+    //   status: "coming-soon",
+    // },
 
-    {
-      id: 4,
-      title: "Premium Home Decor Showcase",
-      location: "Location To Be Announced",
-      date: "Coming Soon",
-      time: "Coming Soon",
-      image: "/exhibition4.jpeg",
-      status: "coming-soon",
-    },
+    // {
+    //   id: 4,
+    //   title: "Premium Home Decor Showcase",
+    //   location: "Location To Be Announced",
+    //   date: "Coming Soon",
+    //   time: "Coming Soon",
+    //   image: "/exhibition4.jpeg",
+    //   status: "coming-soon",
+    // },
 
-    {
-      id: 5,
-      title: "Summer Shopping Carnival",
-      location: "Location To Be Announced",
-      date: "Coming Soon",
-      time: "Coming Soon",
-      image: "/exhibition5.jpeg",
-      status: "coming-soon",
-    },
+    // {
+    //   id: 5,
+    //   title: "Summer Shopping Carnival",
+    //   location: "Location To Be Announced",
+    //   date: "Coming Soon",
+    //   time: "Coming Soon",
+    //   image: "/exhibition5.jpeg",
+    //   status: "coming-soon",
+    // },
   ];
 
   return (

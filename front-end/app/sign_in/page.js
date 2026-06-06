@@ -18,30 +18,38 @@ export default function SignIn() {
   });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const result = await signIn("credentials", {
-        email: form.email,
-        password: form.password,
-        redirect: false,
-      });
+    const result = await signIn("credentials", {
+      email: form.email,
+      password: form.password,
+      redirect: false,
+    });
 
-      if (result?.error) {
-        alert("Invalid credentials");
-        return;
-      }
-
-      router.push("/Book-Stall");
-    } catch (error) {
-      console.error(error);
-      alert("Something went wrong");
-    } finally {
-      setLoading(false);
+    if (result?.error) {
+      alert("Invalid credentials");
+      return;
     }
-  };
+
+    // Admin Email
+    if (
+      form.email.toLowerCase() ===
+      "rangmanchexhibition@gmail.com"
+    ) {
+      router.push("/Admin");
+    } else {
+      router.push("/Book-Stall");
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-[#fdf9f7] flex items-center justify-center px-5 py-10">

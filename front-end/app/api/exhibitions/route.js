@@ -14,9 +14,12 @@ export async function GET() {
   } catch (error) {
     return Response.json(
       {
+        success: false,
         message: error.message,
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }
@@ -30,13 +33,19 @@ export async function POST(req) {
     const exhibition =
       await Exhibition.create(body);
 
-    return Response.json(exhibition);
+    return Response.json({
+      success: true,
+      exhibition,
+    });
   } catch (error) {
     return Response.json(
       {
+        success: false,
         message: error.message,
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }
