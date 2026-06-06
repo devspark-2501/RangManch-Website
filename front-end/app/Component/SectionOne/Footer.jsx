@@ -119,12 +119,12 @@ export default function Footer() {
               </h3>
 
               <ul className="space-y-3 text-gray-300 text-sm">
-                <li><a href="#">Home</a></li>
-                <li><a href="#">About Us</a></li>
-                <li><a href="#">Exhibitions</a></li>
-                <li><a href="#">Vendors</a></li>
-                <li><a href="#">Gallery</a></li>
-                <li><a href="#">Contact</a></li>
+                <li><a href="/">Home</a></li>
+                <li><a href="/about">About Us</a></li>
+                <li><a href="/exhibitions">Exhibitions</a></li>
+                <li><a href="/vendors">Vendors</a></li>
+                <li><a href="/Gallery">Gallery</a></li>
+                <li><a href="/contact">Contact</a></li>
               </ul>
             </div>
 
@@ -158,12 +158,12 @@ export default function Footer() {
 
                 <li className="flex gap-3">
                   <FaPhoneAlt className="mt-1 text-pink-400" />
-                  <span>+91 98765 43210</span>
+                  <span>+91 79762 85009</span>
                 </li>
 
                 <li className="flex gap-3">
                   <FaEnvelope className="mt-1 text-pink-400" />
-                  <span>info@rangmanchexhibition.com</span>
+                  <span>rangmanchexhibition@gmail.com</span>
                 </li>
 
                 <li>
