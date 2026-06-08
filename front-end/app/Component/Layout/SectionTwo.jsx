@@ -180,6 +180,7 @@ export default function SectionTwo() {
           </Link>
         </div>
 
+
       </div>
 
       {/* Marquee keyframe */}
