@@ -1,7 +1,12 @@
+// app/exhibitions/page.js
 import Link from "next/link";
 import { FaMapMarkerAlt, FaCalendarAlt, FaClock } from "react-icons/fa";
 import Exhibition from "@/models/Exhibition";
 import { connectDB } from "@/lib/mongodb";
+import { applyEffectiveStatus } from "@/lib/exhibitionStatus";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const fallbackExhibitions = [
   {
@@ -12,6 +17,7 @@ const fallbackExhibitions = [
     time: "11:00 AM - 8:00 PM",
     image: "/exhibition1.jpeg",
     status: "expired",
+    createdAt: new Date(0).toISOString(),
   },
   {
     _id: "2",
@@ -21,12 +27,9 @@ const fallbackExhibitions = [
     time: "2:00 PM - 9:00 PM",
     image: "/exhibition2.jpeg",
     status: "coming-soon",
+    createdAt: new Date(0).toISOString(),
   },
 ];
-
-// Force dynamic rendering — disables Next.js full-route cache
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 export default async function Exhibitions() {
   let displayExhibitions = fallbackExhibitions;
@@ -45,16 +48,17 @@ export default async function Exhibitions() {
     if (exhibitions.length > 0) {
       console.log("=== [Exhibitions Page] First doc sample:", JSON.stringify(exhibitions[0], null, 2));
 
-      const serializedExhibitions = exhibitions.map((item) => ({
+      const serialized = exhibitions.map((item) => ({
         ...item,
-        _id: item._id.toString(),
-        // Safely serialize any other ObjectId or Date fields
+        _id:       item._id.toString(),
         createdAt: item.createdAt ? item.createdAt.toString() : null,
         updatedAt: item.updatedAt ? item.updatedAt.toString() : null,
       }));
 
-      displayExhibitions = serializedExhibitions;
-      console.log(`=== [Exhibitions Page] Displaying ${serializedExhibitions.length} MongoDB exhibitions ===`);
+      // Apply auto-expiry: any "open" exhibition older than 7 days becomes "expired"
+      displayExhibitions = applyEffectiveStatus(serialized);
+
+      console.log(`=== [Exhibitions Page] Displaying ${displayExhibitions.length} exhibitions (auto-expiry applied) ===`);
     } else {
       console.log("=== [Exhibitions Page] No MongoDB exhibitions found — using fallback ===");
     }

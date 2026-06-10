@@ -1,23 +1,21 @@
+// app/api/gallery/route.js
 import { connectDB } from "@/lib/mongodb";
 import Exhibition from "@/models/Exhibition";
+import { applyEffectiveStatus } from "@/lib/exhibitionStatus";
 
 export async function GET() {
-  try {
-    await connectDB();
+  await connectDB();
 
-    const exhibitions = await Exhibition.find({})
-      .sort({ createdAt: -1 });
+  const exhibitions = await Exhibition.find()
+    .sort({ createdAt: -1 })
+    .lean();
 
-    return Response.json(exhibitions);
-  } catch (error) {
-    return Response.json(
-      {
-        success: false,
-        message: error.message,
-      },
-      {
-        status: 500,
-      }
-    );
-  }
+  const serialized = exhibitions.map((ex) => ({
+    ...ex,
+    _id:       ex._id.toString(),
+    createdAt: ex.createdAt?.toString() ?? null,
+    updatedAt: ex.updatedAt?.toString() ?? null,
+  }));
+
+  return Response.json(applyEffectiveStatus(serialized));
 }
