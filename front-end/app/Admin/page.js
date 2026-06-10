@@ -1,14 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import {
-  FaUsers,
-  FaStore,
   FaImages,
-  FaCalendarCheck,
+  FaCalendarAlt,
+  FaClipboardList,
+  FaUsers,
+  FaSignOutAlt,
 } from "react-icons/fa";
 
-export default function AdminDashboard() {
+const navItems = [
+  { href: "/Admin/create-exhibition", icon: FaCalendarAlt, label: "Exhibitions" },
+  { href: "/Admin/gallery", icon: FaImages, label: "Gallery" },
+  { href: "/Admin/bookings", icon: FaClipboardList, label: "Bookings" },
+  { href: "/Admin/users", icon: FaUsers, label: "Users" },
+];
+
+export default function AdminPage() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -36,87 +45,123 @@ export default function AdminDashboard() {
     {
       label: "Total Exhibitions",
       value: stats?.totalExhibitions,
-      icon: <FaCalendarCheck className="text-white text-2xl" />,
-      gradient: "from-pink-500 to-purple-600",
+      icon: FaCalendarAlt,
+      color: "text-pink-500",
       bg: "bg-pink-50",
-      text: "text-pink-600",
+      border: "border-pink-100",
     },
     {
       label: "Total Bookings",
       value: stats?.totalBookings,
-      icon: <FaStore className="text-white text-2xl" />,
-      gradient: "from-yellow-400 to-orange-500",
-      bg: "bg-yellow-50",
-      text: "text-yellow-600",
+      icon: FaClipboardList,
+      color: "text-violet-500",
+      bg: "bg-violet-50",
+      border: "border-violet-100",
     },
     {
       label: "Total Users",
       value: stats?.totalUsers,
-      icon: <FaUsers className="text-white text-2xl" />,
-      gradient: "from-blue-500 to-indigo-600",
-      bg: "bg-blue-50",
-      text: "text-blue-600",
+      icon: FaUsers,
+      color: "text-teal-500",
+      bg: "bg-teal-50",
+      border: "border-teal-100",
     },
     {
       label: "Gallery Images",
       value: stats?.totalGalleryImages,
-      icon: <FaImages className="text-white text-2xl" />,
-      gradient: "from-green-400 to-teal-500",
-      bg: "bg-green-50",
-      text: "text-green-600",
+      icon: FaImages,
+      color: "text-orange-400",
+      bg: "bg-orange-50",
+      border: "border-orange-100",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-[#fdf9f7] p-6 md:p-10">
+    <div className="min-h-screen bg-white flex">
 
-      {/* Header */}
-      <div className="mb-10">
-        <h1 className="text-3xl md:text-4xl font-bold text-[#1e2a55]">
-          Dashboard
-        </h1>
-        <p className="text-gray-500 mt-1">
-          Welcome back! Here's a live overview of Rang Manch.
-        </p>
-      </div>
+      {/* Sidebar */}
+      <aside className="w-64 bg-white flex flex-col p-6 sticky top-0 h-screen border-r border-gray-100">
 
-      {/* Error */}
-      {error && (
-        <div className="mb-6 px-5 py-4 rounded-2xl bg-red-50 border border-red-200 text-red-600 text-sm font-medium">
-          {error}
+        {/* Brand */}
+        <div className="flex items-center gap-3 mb-10">
+          <img
+            src="/rm_logo.png"
+            alt="Rang Manch Logo"
+            className="w-9 h-9 object-contain"
+          />
+          <div>
+            <h1 className="text-lg font-bold text-[#1e2a55] leading-tight">Rang Manch</h1>
+            <p className="text-[10px] text-gray-400 uppercase tracking-widest">Admin Portal</p>
+          </div>
         </div>
-      )}
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-        {cards.map((card, i) => (
-          <div
-            key={i}
-            className="bg-white rounded-2xl shadow-md border border-pink-100 p-6 flex items-center gap-5"
-          >
-            {/* Icon */}
-            <div
-              className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${card.gradient} flex items-center justify-center flex-shrink-0`}
+        {/* Nav */}
+        <nav className="flex flex-col gap-1 flex-1">
+          {navItems.map(({ href, icon: Icon, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 font-medium text-sm hover:bg-pink-50 hover:text-pink-600 transition-all duration-200 group"
             >
-              {card.icon}
-            </div>
+              <Icon className="group-hover:text-pink-500 transition-colors" />
+              {label}
+            </Link>
+          ))}
+        </nav>
 
-            {/* Value */}
-            <div>
-              <p className="text-sm text-gray-500 font-medium">{card.label}</p>
+        <div className="border-t border-gray-100 pt-4">
+          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 font-medium text-sm hover:bg-red-50 hover:text-red-500 transition-all duration-200">
+            <FaSignOutAlt />
+            Logout
+          </button>
+        </div>
+
+      </aside>
+
+      {/* Main */}
+      <main className="flex-1 p-10 overflow-y-auto">
+
+        {/* Header */}
+        <div className="mb-10">
+          <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Overview</p>
+          <h2 className="text-4xl font-bold text-[#1e2a55]">Admin Dashboard</h2>
+          <p className="text-gray-400 mt-2 text-sm">
+            Manage exhibitions, bookings, gallery and users.
+          </p>
+          <div className="mt-4 h-px bg-gradient-to-r from-pink-200 via-violet-200 to-transparent" />
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div className="mb-6 px-5 py-4 rounded-2xl bg-red-50 border border-red-200 text-red-500 text-sm font-medium">
+            {error}
+          </div>
+        )}
+
+        {/* Stat Cards */}
+        <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-5">
+          {cards.map(({ label, value, icon: Icon, color, bg, border }) => (
+            <div
+              key={label}
+              className={`bg-white rounded-2xl border ${border} p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-default`}
+            >
+              <div className={`w-10 h-10 rounded-xl ${bg} ${color} flex items-center justify-center mb-5 text-base`}>
+                <Icon />
+              </div>
+              <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">{label}</p>
 
               {loading ? (
-                <div className="mt-1 h-8 w-16 rounded-lg bg-gray-100 animate-pulse" />
+                <div className="mt-2 h-9 w-16 rounded-lg bg-gray-100 animate-pulse" />
               ) : (
-                <p className="text-4xl font-bold text-[#1e2a55] leading-tight">
-                  {card.value ?? "—"}
+                <p className="text-4xl font-bold text-[#1e2a55] mt-1">
+                  {value ?? "—"}
                 </p>
               )}
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
+      </main>
     </div>
   );
 }
