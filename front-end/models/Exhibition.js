@@ -25,7 +25,7 @@ const ExhibitionSchema = new mongoose.Schema(
   {
     timestamps: true,
   }
-);
+); // updated file!!
 
 export default mongoose.models.Exhibition ||
   mongoose.model("Exhibition", ExhibitionSchema);
