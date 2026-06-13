@@ -1,29 +1,34 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { FaMapMarkerAlt, FaCalendarAlt, FaTimes, FaChevronLeft, FaChevronRight, FaImages } from "react-icons/fa";
+import {
+  FaImages,
+  FaTimes,
+  FaChevronLeft,
+  FaChevronRight,
+} from "react-icons/fa";
 
 export default function GalleryPage() {
-  const [exhibitions, setExhibitions] = useState([]);
+  const [galleries, setGalleries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lightbox, setLightbox] = useState({ open: false, images: [], index: 0 });
 
   useEffect(() => {
-    const fetchGallery = async () => {
+    const fetchGalleries = async () => {
       try {
-        const res = await fetch("/api/gallery", { cache: "no-store" });
+        const res = await fetch("/api/Admin/gallery", { cache: "no-store" });
         const data = await res.json();
-        const withImages = data.filter((ex) => ex.gallery && ex.gallery.length > 0);
-        setExhibitions(withImages);
+        setGalleries(Array.isArray(data) ? data.filter((g) => g.images?.length > 0) : []);
       } catch (err) {
         console.error("Failed to fetch gallery:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchGallery();
+    fetchGalleries();
   }, []);
 
+  // ── Lightbox helpers ─────────────────────────────────────────────────
   const openLightbox = (images, index) => {
     setLightbox({ open: true, images, index });
     document.body.style.overflow = "hidden";
@@ -59,6 +64,7 @@ export default function GalleryPage() {
     return () => window.removeEventListener("keydown", handler);
   }, [lightbox.open, closeLightbox, prev, next]);
 
+  // ═══════════════════════════════════════════════════════════════════════
   return (
     <section className="min-h-screen bg-[#fdf9f7] py-20">
       <div className="max-w-7xl mx-auto px-5 lg:px-8">
@@ -87,7 +93,7 @@ export default function GalleryPage() {
         )}
 
         {/* Empty */}
-        {!loading && exhibitions.length === 0 && (
+        {!loading && galleries.length === 0 && (
           <div className="flex flex-col items-center justify-center py-32 text-gray-400">
             <FaImages className="text-6xl text-pink-200 mb-5" />
             <p className="text-xl font-semibold text-gray-500">No Gallery Images Available Yet</p>
@@ -96,52 +102,41 @@ export default function GalleryPage() {
         )}
 
         {/* Gallery Sections */}
-        {!loading && exhibitions.length > 0 && (
+        {!loading && galleries.length > 0 && (
           <div className="space-y-20">
-            {exhibitions.map((ex) => (
-              <div key={ex._id}>
+            {galleries.map((gallery) => (
+              <div key={gallery._id}>
 
-                {/* Event Header */}
+                {/* Section header */}
                 <div className="mb-7">
-                  <h2 className="text-2xl md:text-3xl font-bold text-[#1e2a55]">{ex.title}</h2>
-                  <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-gray-500">
-                    {ex.location && (
-                      <span className="flex items-center gap-1.5">
-                        <FaMapMarkerAlt className="text-pink-400" />
-                        {ex.location}
-                      </span>
-                    )}
-                    {ex.date && (
-                      <span className="flex items-center gap-1.5">
-                        <FaCalendarAlt className="text-pink-400" />
-                        {ex.date}
-                      </span>
-                    )}
+                  <h2 className="text-2xl md:text-3xl font-bold text-[#1e2a55]">
+                    {gallery.title}
+                  </h2>
+                  <div className="flex items-center gap-3 mt-2">
                     <span className="text-xs text-gray-400 font-medium">
-                      {ex.gallery.length} photo{ex.gallery.length !== 1 ? "s" : ""}
+                      {gallery.images.length} photo{gallery.images.length !== 1 ? "s" : ""}
                     </span>
                   </div>
                   <div className="w-16 h-0.5 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full mt-4" />
                 </div>
 
-                {/* Masonry Grid */}
+                {/* Masonry grid */}
                 <div className="columns-2 sm:columns-3 lg:columns-4 gap-4 space-y-4">
-                  {ex.gallery.map((img, idx) => (
+                  {gallery.images.map((img, idx) => (
                     <div
                       key={idx}
-                      onClick={() => openLightbox(ex.gallery, idx)}
+                      onClick={() => openLightbox(gallery.images, idx)}
                       className="break-inside-avoid relative group cursor-pointer overflow-hidden rounded-2xl shadow-md border border-pink-50"
                     >
                       <img
                         src={img}
-                        alt={`${ex.title} - ${idx + 1}`}
+                        alt={`${gallery.title} - ${idx + 1}`}
                         className="w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"
                       />
-                      {/* Hover overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl flex items-end p-3">
                         <span className="text-white text-xs font-medium">
-                          {idx + 1} / {ex.gallery.length}
+                          {idx + 1} / {gallery.images.length}
                         </span>
                       </div>
                     </div>
@@ -155,7 +150,7 @@ export default function GalleryPage() {
 
       </div>
 
-      {/* Lightbox */}
+      {/* ── Lightbox ───────────────────────────────────────────────────── */}
       {lightbox.open && (
         <div
           className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
@@ -208,9 +203,14 @@ export default function GalleryPage() {
               {lightbox.images.map((img, i) => (
                 <button
                   key={i}
-                  onClick={(e) => { e.stopPropagation(); setLightbox((lb) => ({ ...lb, index: i })); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightbox((lb) => ({ ...lb, index: i }));
+                  }}
                   className={`flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition ${
-                    i === lightbox.index ? "border-pink-400 opacity-100" : "border-transparent opacity-50 hover:opacity-75"
+                    i === lightbox.index
+                      ? "border-pink-400 opacity-100"
+                      : "border-transparent opacity-50 hover:opacity-75"
                   }`}
                 >
                   <img src={img} alt="" className="w-full h-full object-cover" />
