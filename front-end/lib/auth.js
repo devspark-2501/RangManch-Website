@@ -1,5 +1,6 @@
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
+// env file updated!!!
 
 import bcrypt from "bcryptjs";
 
