@@ -136,7 +136,7 @@ export default function SignIn() {
           <button
             onClick={() =>
               signIn("google", {
-                callbackUrl: "/book-stall",
+                callbackUrl: "/Book-Stall",
               })
             }
             className="w-full py-3 border rounded-xl flex items-center justify-center gap-3 hover:bg-gray-50 transition"
