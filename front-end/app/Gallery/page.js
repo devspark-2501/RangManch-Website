@@ -1,12 +1,17 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+
 import {
   FaImages,
   FaTimes,
   FaChevronLeft,
   FaChevronRight,
 } from "react-icons/fa";
+
+export const metadata = {
+  title: "RangManch | Gallery"
+};
 
 export default function GalleryPage() {
   const [galleries, setGalleries] = useState([]);

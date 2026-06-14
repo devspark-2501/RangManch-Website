@@ -1,7 +1,13 @@
+"use client";
+
 import { FaUsers, FaStore, FaHeart } from "react-icons/fa";
 import { HiArrowRight } from "react-icons/hi";
 
 import Link from "next/link";
+
+export const metadata = {
+  title: "RangManch | About"
+};
 
 export default function About() {
   return (

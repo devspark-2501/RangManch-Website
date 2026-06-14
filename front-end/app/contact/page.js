@@ -1,5 +1,11 @@
+"use client";
+
 import { FaPhoneAlt, FaEnvelope, FaInstagram } from "react-icons/fa";
 import { HiArrowRight } from "react-icons/hi";
+
+export const metadata = {
+  title: "RangManch | Contact"
+};
 
 export default function Contact() {
   return (
