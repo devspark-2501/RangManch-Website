@@ -8,6 +8,8 @@ import {
   FaClipboardList,
   FaUsers,
   FaSignOutAlt,
+  FaBars,
+  FaTimes,
 } from "react-icons/fa";
 
 const navItems = [
@@ -21,6 +23,7 @@ export default function AdminPage() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -79,9 +82,24 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-white flex">
 
-      {/* Sidebar */}
-      <aside className="w-64 bg-white flex flex-col p-6 sticky top-0 h-screen border-r border-gray-100">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/30 z-20 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
+      {/* Sidebar */}
+      <aside
+        className={`
+          fixed lg:sticky top-0 left-0 h-screen z-30
+          w-64 bg-white flex flex-col p-6 border-r border-gray-100
+          transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+          lg:translate-x-0
+        `}
+      >
         {/* Brand */}
         <div className="flex items-center gap-3 mb-10">
           <img
@@ -101,6 +119,7 @@ export default function AdminPage() {
             <Link
               key={href}
               href={href}
+              onClick={() => setSidebarOpen(false)}
               className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 font-medium text-sm hover:bg-pink-50 hover:text-pink-600 transition-all duration-200 group"
             >
               <Icon className="group-hover:text-pink-500 transition-colors" />
@@ -115,16 +134,30 @@ export default function AdminPage() {
             Logout
           </button>
         </div>
-
       </aside>
 
       {/* Main */}
-      <main className="flex-1 p-10 overflow-y-auto">
+      <main className="flex-1 p-5 sm:p-8 lg:p-10 overflow-y-auto min-w-0">
+
+        {/* Mobile top bar */}
+        <div className="flex items-center gap-4 mb-6 lg:hidden">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 rounded-xl text-gray-500 hover:bg-pink-50 hover:text-pink-600 transition-all duration-200"
+            aria-label="Open menu"
+          >
+            <FaBars className="text-xl" />
+          </button>
+          <div className="flex items-center gap-2">
+            <img src="/rm_logo.png" alt="Rang Manch Logo" className="w-7 h-7 object-contain" />
+            <span className="text-base font-bold text-[#1e2a55]">Rang Manch</span>
+          </div>
+        </div>
 
         {/* Header */}
-        <div className="mb-10">
+        <div className="mb-8 lg:mb-10">
           <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Overview</p>
-          <h2 className="text-4xl font-bold text-[#1e2a55]">Admin Dashboard</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#1e2a55]">Admin Dashboard</h2>
           <p className="text-gray-400 mt-2 text-sm">
             Manage exhibitions, bookings, gallery and users.
           </p>
@@ -139,7 +172,7 @@ export default function AdminPage() {
         )}
 
         {/* Stat Cards */}
-        <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
           {cards.map(({ label, value, icon: Icon, color, bg, border }) => (
             <div
               key={label}

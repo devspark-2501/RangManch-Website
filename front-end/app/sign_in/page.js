@@ -4,13 +4,14 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { FaStore } from "react-icons/fa";
+import { FaStore, FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 
 export default function SignIn() {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [form, setForm] = useState({
     email: "",
@@ -18,38 +19,34 @@ export default function SignIn() {
   });
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const result = await signIn("credentials", {
-      email: form.email,
-      password: form.password,
-      redirect: false,
-    });
+      const result = await signIn("credentials", {
+        email: form.email,
+        password: form.password,
+        redirect: false,
+      });
 
-    if (result?.error) {
-      alert("Invalid credentials");
-      return;
+      if (result?.error) {
+        alert("Invalid credentials");
+        return;
+      }
+
+      if (form.email.toLowerCase() === "rangmanchexhibition@gmail.com") {
+        router.push("/Admin");
+      } else {
+        router.push("/Book-Stall");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong");
+    } finally {
+      setLoading(false);
     }
-
-    // Admin Email
-    if (
-      form.email.toLowerCase() ===
-      "rangmanchexhibition@gmail.com"
-    ) {
-      router.push("/Admin");
-    } else {
-      router.push("/Book-Stall");
-    }
-  } catch (error) {
-    console.error(error);
-    alert("Something went wrong");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-[#fdf9f7] flex items-center justify-center px-5 py-10">
@@ -60,9 +57,7 @@ export default function SignIn() {
             <FaStore />
           </div>
 
-          <h1 className="text-4xl font-bold mb-4">
-            Welcome Back
-          </h1>
+          <h1 className="text-4xl font-bold mb-4">Welcome Back</h1>
 
           <p className="leading-relaxed text-white/90">
             Sign in to manage your bookings, stalls, exhibitions and vendor profile.
@@ -72,13 +67,8 @@ export default function SignIn() {
         <div className="p-8 md:p-12">
 
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-[#1e2a55]">
-              Vendor Login
-            </h2>
-
-            <p className="text-gray-500 mt-2">
-              Access your vendor dashboard.
-            </p>
+            <h2 className="text-3xl font-bold text-[#1e2a55]">Vendor Login</h2>
+            <p className="text-gray-500 mt-2">Access your vendor dashboard.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -87,14 +77,11 @@ export default function SignIn() {
               <label className="block mb-2 font-medium text-[#1e2a55]">
                 Email Address
               </label>
-
               <input
                 type="email"
                 required
                 value={form.email}
-                onChange={(e) =>
-                  setForm({ ...form, email: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="you@example.com"
                 className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:border-pink-500"
               />
@@ -104,17 +91,24 @@ export default function SignIn() {
               <label className="block mb-2 font-medium text-[#1e2a55]">
                 Password
               </label>
-
-              <input
-                type="password"
-                required
-                value={form.password}
-                onChange={(e) =>
-                  setForm({ ...form, password: e.target.value })
-                }
-                placeholder="Enter password"
-                className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:border-pink-500"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  placeholder="Enter password"
+                  className="w-full px-4 py-3 pr-12 border rounded-xl focus:outline-none focus:border-pink-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-pink-500 transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                </button>
+              </div>
             </div>
 
             <button
@@ -134,11 +128,7 @@ export default function SignIn() {
           </div>
 
           <button
-            onClick={() =>
-              signIn("google", {
-                callbackUrl: "/Book-Stall",
-              })
-            }
+            onClick={() => signIn("google", { callbackUrl: "/Book-Stall" })}
             className="w-full py-3 border rounded-xl flex items-center justify-center gap-3 hover:bg-gray-50 transition"
           >
             <FcGoogle size={22} />
@@ -147,10 +137,7 @@ export default function SignIn() {
 
           <p className="text-center mt-6 text-gray-500">
             New Vendor?{" "}
-            <Link
-              href="/sign_up"
-              className="text-pink-600 font-semibold"
-            >
+            <Link href="/sign_up" className="text-pink-600 font-semibold">
               Create Account
             </Link>
           </p>
