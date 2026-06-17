@@ -14,7 +14,7 @@ export default function NavBar() {
     { name: "Home", href: "/" },
     { name: "About Us", href: "/about" },
     { name: "Exhibitions", href: "/exhibitions" },
-    { name: "Gallery", href: "/Gallery" },
+    { name: "Gallery", href: "/gallery" },
     { name: "Contact", href: "/contact" },
   ];
 
@@ -48,7 +48,7 @@ export default function NavBar() {
           ))}
         </ul>
 
-        {/* Logged In */}
+        {/* Desktop — Logged In */}
         {session ? (
           <div className="hidden lg:flex items-center gap-4">
 
@@ -60,7 +60,6 @@ export default function NavBar() {
             </Link>
 
             <div className="flex items-center gap-3 bg-[#fdf9f7] px-4 py-2 rounded-xl border">
-
               {session.user?.image ? (
                 <img
                   src={session.user.image}
@@ -72,17 +71,14 @@ export default function NavBar() {
                   {session.user?.name?.charAt(0)}
                 </div>
               )}
-
               <div className="leading-tight">
                 <p className="font-semibold text-sm text-[#1e2a55]">
                   {session.user?.name}
                 </p>
-
                 <p className="text-xs text-gray-500">
                   {session.user?.email}
                 </p>
               </div>
-
             </div>
 
             <button
@@ -107,9 +103,9 @@ export default function NavBar() {
           onClick={() => setMenuOpen(!menuOpen)}
           className="lg:hidden flex flex-col gap-1"
         >
-          <span className="w-6 h-0.5 bg-black"></span>
-          <span className="w-6 h-0.5 bg-black"></span>
-          <span className="w-6 h-0.5 bg-black"></span>
+          <span className="w-6 h-0.5 bg-black" />
+          <span className="w-6 h-0.5 bg-black" />
+          <span className="w-6 h-0.5 bg-black" />
         </button>
 
       </nav>
@@ -124,7 +120,6 @@ export default function NavBar() {
 
           {session && (
             <div className="flex items-center gap-3 py-4 border-b">
-
               {session.user?.image ? (
                 <img
                   src={session.user.image}
@@ -136,17 +131,10 @@ export default function NavBar() {
                   {session.user?.name?.charAt(0)}
                 </div>
               )}
-
               <div>
-                <p className="font-semibold text-[#1e2a55]">
-                  {session.user?.name}
-                </p>
-
-                <p className="text-sm text-gray-500">
-                  {session.user?.email}
-                </p>
+                <p className="font-semibold text-[#1e2a55]">{session.user?.name}</p>
+                <p className="text-sm text-gray-500">{session.user?.email}</p>
               </div>
-
             </div>
           )}
 
@@ -165,7 +153,7 @@ export default function NavBar() {
           {session ? (
             <>
               <Link
-                href="/Book-Stall"
+                href="/Admin"
                 onClick={() => setMenuOpen(false)}
                 className="mt-4 text-center px-5 py-3 rounded-xl text-white font-medium bg-gradient-to-r from-pink-500 to-purple-600"
               >
