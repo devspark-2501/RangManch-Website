@@ -1,14 +1,12 @@
-'use client';
-
 import Link from "next/link";
 import { FaMapMarkerAlt, FaCalendarAlt, FaClock, FaImages } from "react-icons/fa";
 import Exhibition from "@/models/Exhibition";
 import { connectDB } from "@/lib/mongodb";
 import { applyEffectiveStatus } from "@/lib/exhibitionStatus";
 
-export const metadata = {
-  title: "RangManch | Exhibitions"
-};
+// export const metadata = {
+//   title: "RangManch | Exhibitions"
+// };
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
