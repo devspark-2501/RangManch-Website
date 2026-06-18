@@ -324,7 +324,7 @@ export default function BookStall() {
                   </label>
 
                   <Link
-                    href="/read-more"
+                    href="/Privacy"
                     className="text-pink-600 font-semibold text-sm whitespace-nowrap hover:underline flex-shrink-0"
                   >
                     Read More

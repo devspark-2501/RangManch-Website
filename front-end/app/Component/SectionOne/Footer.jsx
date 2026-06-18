@@ -139,7 +139,7 @@ export default function Footer() {
                 <li><a href="#">Stall Details</a></li>
                 <li><a href="#">FAQs</a></li>
                 <li><a href="#">Terms & Conditions</a></li>
-                <li><a href="#">Privacy Policy</a></li>
+                <li><a href="/Privacy">Privacy Policy</a></li>
               </ul>
             </div>
 
