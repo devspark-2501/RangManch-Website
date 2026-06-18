@@ -135,10 +135,10 @@ export default function Footer() {
               </h3>
 
               <ul className="space-y-3 text-gray-300 text-sm">
-                <li><a href="#">Vendor Registration</a></li>
+                <li><a href="Book-Stall">Vendor Registration</a></li>
                 <li><a href="#">Stall Details</a></li>
                 <li><a href="#">FAQs</a></li>
-                <li><a href="#">Terms & Conditions</a></li>
+                <li><a href="terms">Terms & Conditions</a></li>
                 <li><a href="/Privacy">Privacy Policy</a></li>
               </ul>
             </div>
