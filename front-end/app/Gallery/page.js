@@ -1,17 +1,12 @@
-'use client';
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
-
 import {
   FaImages,
   FaTimes,
   FaChevronLeft,
   FaChevronRight,
 } from "react-icons/fa";
-
-// export const metadata = {
-//   title: "RangManch | Gallery"
-// };
 
 export default function GalleryPage() {
   const [galleries, setGalleries] = useState([]);
@@ -36,12 +31,18 @@ export default function GalleryPage() {
   // ── Lightbox helpers ─────────────────────────────────────────────────
   const openLightbox = (images, index) => {
     setLightbox({ open: true, images, index });
-    document.body.style.overflow = "hidden";
+    // Guard: document is only available in the browser
+    if (typeof document !== "undefined") {
+      document.body.style.overflow = "hidden";
+    }
   };
 
   const closeLightbox = useCallback(() => {
     setLightbox({ open: false, images: [], index: 0 });
-    document.body.style.overflow = "";
+    // Guard: document is only available in the browser
+    if (typeof document !== "undefined") {
+      document.body.style.overflow = "";
+    }
   }, []);
 
   const prev = useCallback(() => {
@@ -58,6 +59,7 @@ export default function GalleryPage() {
     }));
   }, []);
 
+  // Keyboard navigation — window access is safe inside useEffect (client-only)
   useEffect(() => {
     const handler = (e) => {
       if (!lightbox.open) return;

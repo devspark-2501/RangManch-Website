@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   FaStore,
   FaPhone,
@@ -308,7 +309,7 @@ export default function BookStall() {
                   </div>
                 </div>
 
-                <div className="mt-8">
+                <div className="mt-8 flex items-center justify-between gap-4">
                   <label className="flex gap-3 cursor-pointer">
                     <input
                       type="checkbox"
@@ -321,6 +322,13 @@ export default function BookStall() {
                       I agree to the exhibition terms and conditions.
                     </span>
                   </label>
+
+                  <Link
+                    href="/read-more"
+                    className="text-pink-600 font-semibold text-sm whitespace-nowrap hover:underline flex-shrink-0"
+                  >
+                    Read More
+                  </Link>
                 </div>
 
                 <button
