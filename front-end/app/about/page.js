@@ -5,10 +5,6 @@ import { HiArrowRight } from "react-icons/hi";
 
 import Link from "next/link";
 
-// export const metadata = {
-//   title: "RangManch | About"
-// };
-
 export default function About() {
   return (
     <section className="bg-[#fdf9f7]">
