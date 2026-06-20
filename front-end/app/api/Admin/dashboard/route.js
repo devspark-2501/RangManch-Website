@@ -3,22 +3,28 @@ import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
 import Booking from "@/models/Booking";
 import Exhibition from "@/models/Exhibition";
+import Gallery from "@/models/Gallery";
 import { getEffectiveStatus } from "@/lib/exhibitionStatus";
 
 export async function GET() {
   try {
     await connectDB();
 
-    const [totalUsers, totalBookings, exhibitions] = await Promise.all([
+    const [totalUsers, totalBookings, exhibitions, galleries] = await Promise.all([
       User.countDocuments(),
       Booking.countDocuments(),
-      Exhibition.find({}, { gallery: 1, status: 1, createdAt: 1, _id: 0 }).lean(),
+      Exhibition.find({}, { status: 1, createdAt: 1, _id: 0 }).lean(),
+      Gallery.find({}, { images: 1, _id: 0 }).lean(),
     ]);
 
     // Apply effective status before counting
-    const totalExhibitions   = exhibitions.length;
-    const totalGalleryImages = exhibitions.reduce(
-      (sum, ex) => sum + (ex.gallery?.length ?? 0),
+    const totalExhibitions = exhibitions.length;
+
+    // Gallery images live in the Gallery collection, not on the Exhibition
+    // document — sum images.length across every gallery document instead
+    // of reading a nonexistent ex.gallery field off Exhibition.
+    const totalGalleryImages = galleries.reduce(
+      (sum, g) => sum + (g.images?.length ?? 0),
       0
     );
 
