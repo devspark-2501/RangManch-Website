@@ -4,10 +4,6 @@ import Exhibition from "@/models/Exhibition";
 import { connectDB } from "@/lib/mongodb";
 import { applyEffectiveStatus } from "@/lib/exhibitionStatus";
 
-// export const metadata = {
-//   title: "RangManch | Exhibitions"
-// };
-
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
@@ -68,7 +64,6 @@ export default async function Exhibitions() {
                     alt={item.title}
                     className="w-full h-64 object-cover"
                   />
-
                   {item.status === "open" && (
                     <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-semibold px-4 py-2 rounded-full">
                       Booking Open
@@ -110,10 +105,10 @@ export default async function Exhibitions() {
                   {/* CTA buttons */}
                   {item.status === "open" && (
                     <Link
-                      href={`/exhibitions/${item._id}`}
+                      href={`/book-stall?event=${item._id}`}
                       className="mt-6 block text-center py-3 rounded-xl text-white font-semibold bg-gradient-to-r from-pink-500 to-purple-600"
                     >
-                      Explore More
+                      Book Stall
                     </Link>
                   )}
                   {item.status === "coming-soon" && (

@@ -9,6 +9,7 @@ import {
   FaClock,
   FaAlignLeft,
   FaCheckCircle,
+  FaRupeeSign,
 } from "react-icons/fa";
 import { MdOutlineTitle } from "react-icons/md";
 
@@ -16,24 +17,25 @@ export default function CreateExhibition() {
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
-    title: "",
-    location: "",
-    date: "",
-    time: "",
-    description: "",
-    status: "coming-soon",
-    image: "",
-    gallery: [],
+    title:          "",
+    location:       "",
+    date:           "",
+    time:           "",
+    description:    "",
+    status:         "coming-soon",
+    image:          "",
+    gallery:        [],
+    entryCost:      "",
+    extraTableCost: "",
   });
 
-  const convertToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
+  const convertToBase64 = (file) =>
+    new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
+      reader.onload  = () => resolve(reader.result);
       reader.onerror = (error) => reject(error);
     });
-  };
 
   const handleCoverImage = async (e) => {
     const file = e.target.files[0];
@@ -43,7 +45,7 @@ export default function CreateExhibition() {
   };
 
   const handleGalleryImages = async (e) => {
-    const files = Array.from(e.target.files);
+    const files  = Array.from(e.target.files);
     const images = [];
     for (const file of files) {
       const base64 = await convertToBase64(file);
@@ -57,16 +59,21 @@ export default function CreateExhibition() {
     try {
       setLoading(true);
       const res = await fetch("/api/exhibitions", {
-        method: "POST",
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body:    JSON.stringify({
+          ...form,
+          entryCost:      Number(form.entryCost)      || 0,
+          extraTableCost: Number(form.extraTableCost) || 0,
+        }),
       });
       const data = await res.json();
       if (!res.ok) { alert(data.message); return; }
       alert("Exhibition Created Successfully");
       setForm({
         title: "", location: "", date: "", time: "",
-        description: "", status: "coming-soon", image: "", gallery: [],
+        description: "", status: "coming-soon",
+        image: "", gallery: [], entryCost: "", extraTableCost: "",
       });
     } catch (error) {
       console.error(error);
@@ -77,9 +84,9 @@ export default function CreateExhibition() {
   };
 
   const statusOptions = [
-    { value: "open", label: "Booking Open", color: "text-green-600 bg-green-50 border-green-200" },
-    { value: "coming-soon", label: "Coming Soon", color: "text-yellow-600 bg-yellow-50 border-yellow-200" },
-    { value: "expired", label: "Event Completed", color: "text-red-500 bg-red-50 border-red-200" },
+    { value: "open",        label: "Booking Open",    color: "text-green-600 bg-green-50 border-green-200" },
+    { value: "coming-soon", label: "Coming Soon",     color: "text-yellow-600 bg-yellow-50 border-yellow-200" },
+    { value: "expired",     label: "Event Completed", color: "text-red-500 bg-red-50 border-red-200" },
   ];
 
   return (
@@ -98,7 +105,7 @@ export default function CreateExhibition() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
 
-          {/* Section: Basic Info */}
+          {/* Section 1: Basic Info */}
           <div className="bg-white rounded-2xl shadow-md border border-pink-100 p-6 md:p-8">
             <h2 className="text-base font-semibold text-[#1e2a55] mb-5 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 text-white text-xs flex items-center justify-center font-bold">1</span>
@@ -107,7 +114,6 @@ export default function CreateExhibition() {
 
             <div className="space-y-5">
 
-              {/* Title */}
               <div>
                 <label className="block mb-1.5 text-sm font-semibold text-[#1e2a55]">
                   Exhibition Title *
@@ -125,7 +131,6 @@ export default function CreateExhibition() {
                 </div>
               </div>
 
-              {/* Location */}
               <div>
                 <label className="block mb-1.5 text-sm font-semibold text-[#1e2a55]">
                   Location *
@@ -143,7 +148,6 @@ export default function CreateExhibition() {
                 </div>
               </div>
 
-              {/* Date + Time */}
               <div className="grid md:grid-cols-2 gap-5">
                 <div>
                   <label className="block mb-1.5 text-sm font-semibold text-[#1e2a55]">
@@ -180,7 +184,6 @@ export default function CreateExhibition() {
                 </div>
               </div>
 
-              {/* Description */}
               <div>
                 <label className="block mb-1.5 text-sm font-semibold text-[#1e2a55]">
                   Description
@@ -200,7 +203,7 @@ export default function CreateExhibition() {
             </div>
           </div>
 
-          {/* Section: Status */}
+          {/* Section 2: Status */}
           <div className="bg-white rounded-2xl shadow-md border border-pink-100 p-6 md:p-8">
             <h2 className="text-base font-semibold text-[#1e2a55] mb-5 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 text-white text-xs flex items-center justify-center font-bold">2</span>
@@ -240,10 +243,57 @@ export default function CreateExhibition() {
             </div>
           </div>
 
-          {/* Section: Images */}
+          {/* Section 3: Stall Pricing */}
           <div className="bg-white rounded-2xl shadow-md border border-pink-100 p-6 md:p-8">
             <h2 className="text-base font-semibold text-[#1e2a55] mb-5 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 text-white text-xs flex items-center justify-center font-bold">3</span>
+              Stall Pricing
+            </h2>
+
+            <div className="grid md:grid-cols-2 gap-5">
+
+              <div>
+                <label className="block mb-1.5 text-sm font-semibold text-[#1e2a55]">
+                  Entry Cost (₹) *
+                </label>
+                <div className="relative">
+                  <FaRupeeSign className="absolute left-4 top-3.5 text-gray-400 text-sm" />
+                  <input
+                    type="number"
+                    min="0"
+                    required
+                    placeholder="e.g. 2500"
+                    value={form.entryCost}
+                    onChange={(e) => setForm({ ...form, entryCost: e.target.value })}
+                    className="w-full border border-gray-200 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100 transition"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block mb-1.5 text-sm font-semibold text-[#1e2a55]">
+                  Extra Table Cost (₹)
+                </label>
+                <div className="relative">
+                  <FaRupeeSign className="absolute left-4 top-3.5 text-gray-400 text-sm" />
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="e.g. 500"
+                    value={form.extraTableCost}
+                    onChange={(e) => setForm({ ...form, extraTableCost: e.target.value })}
+                    className="w-full border border-gray-200 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100 transition"
+                  />
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Section 4: Images */}
+          <div className="bg-white rounded-2xl shadow-md border border-pink-100 p-6 md:p-8">
+            <h2 className="text-base font-semibold text-[#1e2a55] mb-5 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 text-white text-xs flex items-center justify-center font-bold">4</span>
               Images
             </h2>
 
@@ -254,7 +304,6 @@ export default function CreateExhibition() {
                 <label className="block mb-2 text-sm font-semibold text-[#1e2a55]">
                   Cover Image
                 </label>
-
                 <label className="flex flex-col items-center justify-center w-full border-2 border-dashed border-pink-200 rounded-xl py-8 cursor-pointer hover:border-pink-400 hover:bg-pink-50/40 transition group">
                   <FaImage className="text-3xl text-pink-300 group-hover:text-pink-500 transition mb-2" />
                   <span className="text-sm text-gray-500 group-hover:text-pink-600 transition font-medium">
@@ -268,7 +317,6 @@ export default function CreateExhibition() {
                     className="hidden"
                   />
                 </label>
-
                 {form.image && (
                   <div className="mt-4 relative inline-block">
                     <img
@@ -288,7 +336,6 @@ export default function CreateExhibition() {
                 <label className="block mb-2 text-sm font-semibold text-[#1e2a55]">
                   Gallery Images
                 </label>
-
                 <label className="flex flex-col items-center justify-center w-full border-2 border-dashed border-purple-200 rounded-xl py-8 cursor-pointer hover:border-purple-400 hover:bg-purple-50/40 transition group">
                   <FaImages className="text-3xl text-purple-300 group-hover:text-purple-500 transition mb-2" />
                   <span className="text-sm text-gray-500 group-hover:text-purple-600 transition font-medium">

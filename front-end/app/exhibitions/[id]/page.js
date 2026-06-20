@@ -1,7 +1,11 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connectDB } from "@/lib/mongodb";
 import Exhibition from "@/models/Exhibition";
 import Gallery from "@/models/Gallery";
+import { getEffectiveStatus } from "@/lib/exhibitionStatus";
+
+export const dynamic = "force-dynamic";
 
 export default async function ExhibitionDetails({ params }) {
   await connectDB();
@@ -21,17 +25,19 @@ export default async function ExhibitionDetails({ params }) {
   try {
     gallery = await Gallery.findOne({ exhibitionId: params.id }).lean();
   } catch {
-    // If gallery fetch fails, just show nothing — don't crash the page
     gallery = null;
   }
 
   // ── Serialize ─────────────────────────────────────────────────────────
   const event = {
     ...exhibition,
-    _id: exhibition._id.toString(),
+    _id:       exhibition._id.toString(),
     createdAt: exhibition.createdAt?.toString() ?? null,
     updatedAt: exhibition.updatedAt?.toString() ?? null,
   };
+
+  // Apply effective status (auto-expiry logic)
+  const effectiveStatus = getEffectiveStatus(event);
 
   const galleryImages = gallery?.images ?? [];
 
@@ -59,19 +65,13 @@ export default async function ExhibitionDetails({ params }) {
 
           <div className="mt-6 space-y-2 text-gray-600">
             {event.location && (
-              <p>
-                <strong>Location:</strong> {event.location}
-              </p>
+              <p><strong>Location:</strong> {event.location}</p>
             )}
             {event.date && (
-              <p>
-                <strong>Date:</strong> {event.date}
-              </p>
+              <p><strong>Date:</strong> {event.date}</p>
             )}
             {event.time && (
-              <p>
-                <strong>Time:</strong> {event.time}
-              </p>
+              <p><strong>Time:</strong> {event.time}</p>
             )}
           </div>
 
@@ -88,6 +88,37 @@ export default async function ExhibitionDetails({ params }) {
 
         </div>
 
+        {/* ── Stall Booking CTA ────────────────────────────────────────── */}
+        {effectiveStatus === "open" && (
+          <div className="mt-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-3xl p-8 shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <h2 className="text-2xl font-bold text-white">
+                Book Your Stall
+              </h2>
+              <p className="text-white/80 mt-1">
+                Reserve your space at this exhibition and showcase your products.
+              </p>
+            </div>
+            <Link
+              href={`/book-stall?event=${event._id}`}
+              className="flex-shrink-0 px-8 py-3 rounded-xl bg-white text-pink-600 font-bold text-base hover:scale-[1.03] transition shadow-md"
+            >
+              Book Stall →
+            </Link>
+          </div>
+        )}
+
+        {effectiveStatus === "coming-soon" && (
+          <div className="mt-10 bg-yellow-50 border border-yellow-200 rounded-3xl p-8 text-center shadow-sm">
+            <p className="text-yellow-700 font-semibold text-lg">
+              Registrations opening soon
+            </p>
+            <p className="text-yellow-600 text-sm mt-1">
+              Check back once this exhibition is open for stall bookings.
+            </p>
+          </div>
+        )}
+
         {/* ── Gallery Section ──────────────────────────────────────────── */}
         <div className="mt-16">
           <h2 className="text-3xl font-bold text-[#1e2a55] mb-8">
@@ -95,7 +126,6 @@ export default async function ExhibitionDetails({ params }) {
           </h2>
 
           {galleryImages.length === 0 ? (
-            /* No gallery linked yet */
             <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl shadow-sm border border-dashed border-pink-200 text-gray-400">
               <svg
                 className="w-16 h-16 text-pink-200 mb-4"
@@ -113,18 +143,12 @@ export default async function ExhibitionDetails({ params }) {
               <p className="text-lg font-semibold text-gray-500">
                 No gallery available yet
               </p>
-              <p className="text-sm mt-1">
-                Check back after the exhibition.
-              </p>
+              <p className="text-sm mt-1">Check back after the exhibition.</p>
             </div>
           ) : (
-            /* Gallery grid */
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {galleryImages.map((img, index) => (
-                <div
-                  key={index}
-                  className="overflow-hidden rounded-2xl shadow-md"
-                >
+                <div key={index} className="overflow-hidden rounded-2xl shadow-md">
                   <img
                     src={img}
                     alt={`Gallery ${index + 1}`}
