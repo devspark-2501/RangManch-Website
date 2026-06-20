@@ -100,7 +100,7 @@ export default async function ExhibitionDetails({ params }) {
               </p>
             </div>
             <Link
-              href={`/book-stall?event=${event._id}`}
+              href={`/Book-Stall?event=${event._id}`}
               className="flex-shrink-0 px-8 py-3 rounded-xl bg-white text-pink-600 font-bold text-base hover:scale-[1.03] transition shadow-md"
             >
               Book Stall →

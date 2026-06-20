@@ -105,7 +105,7 @@ export default async function Exhibitions() {
                   {/* CTA buttons */}
                   {item.status === "open" && (
                     <Link
-                      href={`/book-stall?event=${item._id}`}
+                      href={`/Book-Stall?event=${item._id}`}
                       className="mt-6 block text-center py-3 rounded-xl text-white font-semibold bg-gradient-to-r from-pink-500 to-purple-600"
                     >
                       Book Stall
