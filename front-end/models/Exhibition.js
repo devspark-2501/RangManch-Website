@@ -2,17 +2,50 @@ import mongoose from "mongoose";
 
 const ExhibitionSchema = new mongoose.Schema(
   {
-    title: String,
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-    location: String,
+    location: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-    date: String,
+    date: {
+      type: String,
+      required: true,
+    },
 
-    time: String,
+    time: {
+      type: String,
+      required: true,
+    },
 
-    description: String,
+    description: {
+      type: String,
+      default: "",
+    },
 
-    image: String,
+    image: {
+      type: String,
+      default: "",
+    },
+
+    // Stall Charges
+    entryCost: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+
+    extraTableCost: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
 
     status: {
       type: String,
@@ -20,12 +53,15 @@ const ExhibitionSchema = new mongoose.Schema(
       default: "coming-soon",
     },
 
-    gallery: [String],
+    gallery: {
+      type: [String],
+      default: [],
+    },
   },
   {
     timestamps: true,
   }
-); // updated file!!
+);
 
 export default mongoose.models.Exhibition ||
   mongoose.model("Exhibition", ExhibitionSchema);
