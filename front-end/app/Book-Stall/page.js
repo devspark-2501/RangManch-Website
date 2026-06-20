@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -15,7 +15,7 @@ import {
 } from "react-icons/fa";
 import { getEffectiveStatus } from "@/lib/exhibitionStatus";
 
-export default function BookStall() {
+function BookStallContent() {
   const searchParams = useSearchParams();
   const eventParam = searchParams.get("event"); // ?event=<exhibitionId>
 
@@ -565,5 +565,13 @@ export default function BookStall() {
         </div>
       </div>
     </section>
+  );
+}
+
+export default function BookStall() {
+  return (
+    <Suspense fallback={null}>
+      <BookStallContent />
+    </Suspense>
   );
 }
