@@ -13,6 +13,7 @@ import {
   FaRupeeSign,
   FaChevronDown,
 } from "react-icons/fa";
+import { getEffectiveStatus } from "@/lib/exhibitionStatus";
 
 export default function BookStall() {
   const searchParams = useSearchParams();
@@ -52,13 +53,16 @@ export default function BookStall() {
         const res  = await fetch("/api/exhibitions", { cache: "no-store" });
         const data = await res.json();
 
-        // Only OPEN exhibitions, latest first
+        // Only exhibitions whose EFFECTIVE status is "open" — never trust
+        // the raw DB "status" field directly, since it goes stale once an
+        // exhibition's createdAt passes the expiry window.
         const open = (Array.isArray(data) ? data : []).filter(
-          (ex) => ex.status === "open"
+          (ex) => getEffectiveStatus(ex) === "open"
         );
         setOpenExhibitions(open);
 
-        // If ?event= param present, pre-select that exhibition
+        // If ?event= param present, pre-select that exhibition —
+        // but only if it's still effectively open.
         if (eventParam) {
           const match = open.find((ex) => ex._id === eventParam);
           if (match) setSelectedExhibition(match);
@@ -71,6 +75,16 @@ export default function BookStall() {
     };
     fetchExhibitions();
   }, [eventParam]);
+
+  // ── Safety net: if the currently selected exhibition ever stops being
+  // effectively open (e.g. it expires while the user is mid-form), clear
+  // the selection automatically rather than let a stale booking proceed.
+  useEffect(() => {
+    if (selectedExhibition && getEffectiveStatus(selectedExhibition) !== "open") {
+      setSelectedExhibition(null);
+      setForm((prev) => ({ ...prev, extraTableCount: 0 }));
+    }
+  }, [selectedExhibition]);
 
   // ── Handlers ─────────────────────────────────────────────────────────
   const handleChange = (e) => {
@@ -94,6 +108,14 @@ export default function BookStall() {
 
     if (!selectedExhibition) {
       alert("Please select an exhibition first.");
+      return;
+    }
+
+    // Final guard: re-check effective status right before submitting,
+    // in case time passed between selection and submit.
+    if (getEffectiveStatus(selectedExhibition) !== "open") {
+      alert("This exhibition is no longer open for booking. Please select another.");
+      setSelectedExhibition(null);
       return;
     }
 
