@@ -33,9 +33,20 @@ const BookingSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    // Updated to reflect payment-aware statuses
     status: {
       type: String,
-      default: "Pending",
+      enum: [
+        "Pending Payment Verification",
+        "Confirmed",
+        "Payment Rejected",
+        "Pending",
+        "Approved",
+        "Rejected",
+        "Paid",
+      ],
+      default: "Pending Payment Verification",
     },
 
     // ── Exhibition Link ──────────────────────────────────────────────────
@@ -48,8 +59,16 @@ const BookingSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    exhibitionDate: {
+      type: String,
+      default: "",
+    },
+    exhibitionLocation: {
+      type: String,
+      default: "",
+    },
 
-    // ── Pricing ──────────────────────────────────────────────────────────
+    // ── Pricing (always set by server) ───────────────────────────────────
     entryCost: {
       type: Number,
       default: 0,
