@@ -455,12 +455,12 @@ function BookStallContent() {
                     <span className="text-gray-700">
                       I agree to the exhibition{" "}
                       <a
-                        href="/read-more"
+                        href="/terms"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-pink-600 underline hover:text-purple-600 transition font-medium"
                       >
-                        terms and conditions
+                        read more
                       </a>
                       .
                     </span>
