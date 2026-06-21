@@ -53,10 +53,18 @@ export default function Footer() {
               </button>
             </Link>
 
-              <button className="flex items-center justify-center gap-2 text-green-600 font-medium">
-                <FaWhatsapp />
-                Chat on WhatsApp
-              </button>
+             <li>
+                <a
+                  href="https://wa.me/918078681321"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <button className="flex items-center justify-center gap-2 text-green-600 font-medium">
+                    <FaWhatsapp />
+                    Chat on WhatsApp
+                  </button>
+                </a>
+              </li>
 
             </div>
 
@@ -167,10 +175,16 @@ export default function Footer() {
                 </li>
 
                 <li>
-                  <button className="mt-2 px-4 py-2 bg-green-600 rounded-lg flex items-center gap-2 hover:bg-green-700 transition">
-                    <FaWhatsapp />
-                    WhatsApp Us
-                  </button>
+                  <a
+                    href="https://wa.me/918078681321"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <button className="mt-2 px-4 py-2 bg-green-600 rounded-lg flex items-center gap-2 hover:bg-green-700 transition">
+                      <FaWhatsapp />
+                      WhatsApp Us
+                    </button>
+                  </a>
                 </li>
 
               </ul>
