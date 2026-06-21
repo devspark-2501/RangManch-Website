@@ -10,13 +10,15 @@ import {
   FaSignOutAlt,
   FaBars,
   FaTimes,
+  FaCreditCard,
 } from "react-icons/fa";
 
 const navItems = [
-  { href: "/Admin/create-exhibition", icon: FaCalendarAlt, label: "Exhibitions" },
-  { href: "/Admin/gallery", icon: FaImages, label: "Gallery" },
-  { href: "/Admin/bookings", icon: FaClipboardList, label: "Bookings" },
-  { href: "/Admin/users", icon: FaUsers, label: "Users" },
+  { href: "/Admin/create-exhibition", icon: FaCalendarAlt,   label: "Exhibitions" },
+  { href: "/Admin/gallery",           icon: FaImages,        label: "Gallery" },
+  { href: "/Admin/bookings",          icon: FaClipboardList, label: "Bookings" },
+  { href: "/Admin/payments",          icon: FaCreditCard,    label: "Payments" },
+  { href: "/Admin/users",             icon: FaUsers,         label: "Users" },
 ];
 
 export default function AdminPage() {
