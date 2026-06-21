@@ -175,6 +175,15 @@ function BookStallContent() {
           exhibitionId:    selectedExhibition._id,
           category:        form.category,
           extraTableCount: form.extraTableCount,
+          // Included so the Razorpay order's notes carry enough context
+          // for the webhook to build a Booking independently if it
+          // processes the payment before /verify-payment does.
+          vendorName:      form.vendorName,
+          businessName:    form.businessName,
+          mobile:          form.mobile,
+          email:           form.email,
+          products:        form.products,
+          social:          form.social,
         }),
       });
       const orderData = await orderRes.json();

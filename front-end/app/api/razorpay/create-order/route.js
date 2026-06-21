@@ -16,7 +16,10 @@ export async function POST(req) {
     await connectDB();
 
     const body = await req.json();
-    const { exhibitionId, category, extraTableCount } = body;
+    const {
+      exhibitionId, category, extraTableCount,
+      vendorName, businessName, mobile, email, products, social,
+    } = body;
 
     // ── Validate ─────────────────────────────────────────────────────────
     if (!exhibitionId) {
@@ -88,6 +91,11 @@ export async function POST(req) {
     }
 
     // ── Create Razorpay order ────────────────────────────────────────────
+    // Notes carry enough vendor + booking context for the webhook
+    // (payment.captured) to independently reconstruct and create a
+    // Booking if it processes the payment before verify-payment does.
+    // Razorpay limits notes to 15 key/value pairs, 256 chars each —
+    // everything below stays comfortably within that.
     const order = await razorpay.orders.create({
       amount:   amountInPaise,
       currency: "INR",
@@ -95,6 +103,13 @@ export async function POST(req) {
         exhibitionId:    exhibition._id.toString(),
         exhibitionTitle: exhibition.title,
         category,
+        extraTableCount: String(safeCount),
+        vendorName:      vendorName   ?? "",
+        businessName:    businessName ?? "",
+        mobile:          mobile       ?? "",
+        email:           email        ?? "",
+        products:        (products ?? "").slice(0, 250),
+        social:          (social   ?? "").slice(0, 250),
       },
     });
 

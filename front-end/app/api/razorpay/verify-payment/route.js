@@ -1,5 +1,4 @@
 import crypto from "crypto";
-import Razorpay from "razorpay";
 import { connectDB } from "@/lib/mongodb";
 import Exhibition from "@/models/Exhibition";
 import Booking from "@/models/Booking";
@@ -64,6 +63,25 @@ export async function POST(req) {
       );
     }
 
+    // ── Idempotency check: has the webhook already processed this order? ─
+    // The webhook (payment.captured) may run before, during, or after this
+    // request — Razorpay can deliver the webhook within milliseconds of
+    // the client-side handler firing. If a Payment already exists for
+    // this orderId, everything has already been created; just report it.
+    const existingPayment = await Payment.findOne({ razorpayOrderId });
+    if (existingPayment) {
+      if (existingPayment.bookingId) {
+        const existingBooking = await Booking.findById(existingPayment.bookingId).lean();
+        return Response.json(
+          { success: true, booking: existingBooking, payment: existingPayment, alreadyProcessed: true },
+          { status: 200 }
+        );
+      }
+      // Payment exists but has no booking yet (e.g. webhook recorded a
+      // Failed/amount-mismatch case) — fall through and let normal flow
+      // attempt booking creation; the unique index still protects us.
+    }
+
     // ── Fetch exhibition ─────────────────────────────────────────────────
     const exhibition = await Exhibition.findById(exhibitionId).lean();
     if (!exhibition) {
@@ -110,45 +128,75 @@ export async function POST(req) {
     const extraTableCost = exhibition.extraTableCost ?? 0;
     const totalAmount    = entryCost + extraTableCost * safeCount;
 
-    // ── Create Booking ────────────────────────────────────────────────────
-    const booking = await Booking.create({
-      vendorName,
-      businessName,
-      mobile,
-      email,
-      category,
-      products:           products   ?? "",
-      social:             social     ?? "",
-      terms:              terms      ?? false,
-      status:             "Confirmed",
-      exhibitionId:       exhibition._id,
-      exhibitionTitle:    exhibition.title,
-      exhibitionDate:     exhibition.date     ?? "",
-      exhibitionLocation: exhibition.location ?? "",
-      entryCost,
-      extraTableCost,
-      extraTableCount:    safeCount,
-      totalAmount,
-    });
+    // ── Create Booking + Payment ──────────────────────────────────────────
+    // If the webhook wins the race and inserts a Payment for this same
+    // razorpayOrderId between our check above and this insert, the unique
+    // index on Payment.razorpayOrderId rejects this with E11000 — caught
+    // below so we don't create a duplicate Booking.
+    let booking;
+    try {
+      booking = await Booking.create({
+        vendorName,
+        businessName,
+        mobile,
+        email,
+        category,
+        products:           products   ?? "",
+        social:             social     ?? "",
+        terms:              terms      ?? false,
+        status:             "Confirmed",
+        exhibitionId:       exhibition._id,
+        exhibitionTitle:    exhibition.title,
+        exhibitionDate:     exhibition.date     ?? "",
+        exhibitionLocation: exhibition.location ?? "",
+        entryCost,
+        extraTableCost,
+        extraTableCount:    safeCount,
+        totalAmount,
+      });
 
-    // ── Create Payment record ─────────────────────────────────────────────
-    const payment = await Payment.create({
-      bookingId:         booking._id,
-      exhibitionId:      exhibition._id,
-      vendorName,
-      email,
-      mobile,
-      amount:            totalAmount,
-      razorpayOrderId,
-      razorpayPaymentId,
-      razorpaySignature,
-      paymentStatus:     "Paid",
-    });
+      const payment = await Payment.create({
+        bookingId:         booking._id,
+        exhibitionId:      exhibition._id,
+        vendorName,
+        email,
+        mobile,
+        amount:            totalAmount,
+        razorpayOrderId,
+        razorpayPaymentId,
+        razorpaySignature,
+        paymentStatus:     "Paid",
+      });
 
-    return Response.json(
-      { success: true, booking, payment },
-      { status: 201 }
-    );
+      return Response.json(
+        { success: true, booking, payment },
+        { status: 201 }
+      );
+    } catch (err) {
+      if (err.code === 11000) {
+        // Webhook already created the Payment (and likely the Booking)
+        // for this orderId. Roll back our orphan booking and return the
+        // webhook's version instead of erroring out to the vendor.
+        if (booking) {
+          await Booking.findByIdAndDelete(booking._id);
+        }
+        const winningPayment = await Payment.findOne({ razorpayOrderId });
+        const winningBooking = winningPayment?.bookingId
+          ? await Booking.findById(winningPayment.bookingId).lean()
+          : null;
+
+        return Response.json(
+          {
+            success: true,
+            booking: winningBooking,
+            payment: winningPayment,
+            alreadyProcessed: true,
+          },
+          { status: 200 }
+        );
+      }
+      throw err;
+    }
   } catch (error) {
     console.error("POST /api/razorpay/verify-payment error:", error);
     return Response.json(

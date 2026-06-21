@@ -5,7 +5,7 @@ const PaymentSchema = new mongoose.Schema(
     bookingId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Booking",
-      required: true,
+      default: null, // null until booking is actually created (idempotent path)
     },
     exhibitionId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -28,11 +28,15 @@ const PaymentSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-
     // ── Razorpay fields ──────────────────────────────────────────────────
     razorpayOrderId: {
       type: String,
       required: true,
+      unique: true, // ← critical: makes booking creation idempotent.
+                    // Webhook and verify-payment both try to create a
+                    // Payment for the same orderId; Mongo rejects the
+                    // second insert with E11000, which we catch and
+                    // treat as "already handled" rather than an error.
     },
     razorpayPaymentId: {
       type: String,
@@ -42,7 +46,6 @@ const PaymentSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-
     paymentStatus: {
       type: String,
       enum: ["Created", "Paid", "Failed", "Refunded"],
