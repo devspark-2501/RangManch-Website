@@ -3,6 +3,9 @@ import Booking from "@/models/Booking";
 import Payment from "@/models/Payment";
 import Exhibition from "@/models/Exhibition";
 
+// Statuses that count toward a category's capacity.
+const CAPACITY_STATUSES = ["Pending Payment Verification", "Confirmed"];
+
 export async function POST(req) {
   try {
     await connectDB();
@@ -13,6 +16,12 @@ export async function POST(req) {
     if (!body.exhibitionId) {
       return Response.json(
         { success: false, message: "Please select an exhibition." },
+        { status: 400 }
+      );
+    }
+    if (!body.category?.trim()) {
+      return Response.json(
+        { success: false, message: "Please select a product category." },
         { status: 400 }
       );
     }
@@ -40,6 +49,35 @@ export async function POST(req) {
     if (exhibition.status !== "open") {
       return Response.json(
         { success: false, message: "This exhibition is not open for bookings." },
+        { status: 400 }
+      );
+    }
+
+    // ── Validate category against exhibition's own categoryLimits ───────
+    const categoryDef = (exhibition.categoryLimits ?? []).find(
+      (c) => c.category === body.category
+    );
+    if (!categoryDef) {
+      return Response.json(
+        { success: false, message: "Selected category is not valid for this exhibition." },
+        { status: 400 }
+      );
+    }
+
+    // ── Capacity check — count existing bookings for this exhibition +
+    // category, restricted to statuses that count toward capacity ───────
+    const existingCount = await Booking.countDocuments({
+      exhibitionId: exhibition._id,
+      category:     body.category,
+      status:       { $in: CAPACITY_STATUSES },
+    });
+
+    if (existingCount >= categoryDef.maxSlots) {
+      return Response.json(
+        {
+          success: false,
+          message: "This category is already full for the selected exhibition.",
+        },
         { status: 400 }
       );
     }

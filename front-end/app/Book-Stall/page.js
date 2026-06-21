@@ -29,6 +29,12 @@ function BookStallContent() {
   const [selectedExhibition, setSelectedExhibition] = useState(null);
   const [loadingExhibitions, setLoadingExhibitions] = useState(true);
 
+  // ── Category slot state ───────────────────────────────────────────────
+  // categorySlots holds, per category, how many bookings already count
+  // toward capacity for the currently selected exhibition.
+  const [categorySlots, setCategorySlots]       = useState({});
+  const [loadingCategorySlots, setLoadingCategorySlots] = useState(false);
+
   // ── Form state ───────────────────────────────────────────────────────
   const [form, setForm] = useState({
     vendorName:      "",
@@ -60,6 +66,9 @@ function BookStallContent() {
   // UPI deep-link for mobile pay buttons
   const upiLink = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${totalAmount}&cu=INR`;
 
+  // ── Category list for the selected exhibition ────────────────────────
+  const categoryLimits = selectedExhibition?.categoryLimits ?? [];
+
   // ── Fetch exhibitions ─────────────────────────────────────────────────
   useEffect(() => {
     const fetchExhibitions = async () => {
@@ -88,9 +97,36 @@ function BookStallContent() {
   useEffect(() => {
     if (selectedExhibition && getEffectiveStatus(selectedExhibition) !== "open") {
       setSelectedExhibition(null);
-      setForm((prev) => ({ ...prev, extraTableCount: 0 }));
+      setForm((prev) => ({ ...prev, extraTableCount: 0, category: "" }));
     }
   }, [selectedExhibition]);
+
+  // ── Fetch live category slot counts whenever exhibition changes ─────
+  useEffect(() => {
+    if (!selectedExhibition?._id) {
+      setCategorySlots({});
+      return;
+    }
+
+    const fetchSlots = async () => {
+      setLoadingCategorySlots(true);
+      try {
+        const res = await fetch(
+          `/api/exhibitions/${selectedExhibition._id}/category-slots`,
+          { cache: "no-store" }
+        );
+        const data = await res.json();
+        // Expected shape: { "Clothing": 1, "Jewellery": 3, ... }
+        setCategorySlots(data && typeof data === "object" ? data : {});
+      } catch (err) {
+        console.error("Failed to fetch category slot counts:", err);
+        setCategorySlots({});
+      } finally {
+        setLoadingCategorySlots(false);
+      }
+    };
+    fetchSlots();
+  }, [selectedExhibition?._id]);
 
   // ── Handlers ─────────────────────────────────────────────────────────
   const handleChange = (e) => {
@@ -105,7 +141,7 @@ function BookStallContent() {
     const id  = e.target.value;
     const exh = openExhibitions.find((ex) => ex._id === id) ?? null;
     setSelectedExhibition(exh);
-    setForm((prev) => ({ ...prev, extraTableCount: 0 }));
+    setForm((prev) => ({ ...prev, extraTableCount: 0, category: "" }));
   };
 
   const handleScreenshotUpload = (e) => {
@@ -128,6 +164,12 @@ function BookStallContent() {
     }
   };
 
+  // Returns remaining slots for a category, or null if unknown/loading
+  const getRemainingSlots = (categoryName, maxSlots) => {
+    const filled = categorySlots[categoryName] ?? 0;
+    return Math.max(0, maxSlots - filled);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -140,6 +182,26 @@ function BookStallContent() {
       setSelectedExhibition(null);
       return;
     }
+    if (!form.category) {
+      alert("Please select a product category.");
+      return;
+    }
+
+    // Client-side capacity check — final authority is still the server.
+    const selectedCategoryDef = categoryLimits.find(
+      (c) => c.category === form.category
+    );
+    if (selectedCategoryDef) {
+      const remaining = getRemainingSlots(
+        selectedCategoryDef.category,
+        selectedCategoryDef.maxSlots
+      );
+      if (remaining <= 0) {
+        alert("This category is already full for the selected exhibition.");
+        return;
+      }
+    }
+
     if (!transactionId.trim()) {
       alert("Please enter your Transaction ID (UTR Number).");
       return;
@@ -186,6 +248,21 @@ function BookStallContent() {
       setTransactionId("");
       setPaymentScreenshot("");
       setScreenshotName("");
+
+      // Refresh category slot counts since this booking now counts
+      // toward capacity for its category.
+      if (selectedExhibition?._id) {
+        try {
+          const res = await fetch(
+            `/api/exhibitions/${selectedExhibition._id}/category-slots`,
+            { cache: "no-store" }
+          );
+          const slotData = await res.json();
+          setCategorySlots(slotData && typeof slotData === "object" ? slotData : {});
+        } catch {
+          // non-fatal — slot counts will just be stale until next fetch
+        }
+      }
     } catch (error) {
       console.error(error);
       alert(error.message);
@@ -524,23 +601,73 @@ function BookStallContent() {
                   </div>
                 </div>
 
+                {/* ── Dynamic Category Dropdown ────────────────────────── */}
                 <div className="mt-6">
-                  <label className="font-semibold text-[#1e2a55] block mb-2">Product Category *</label>
-                  <select
-                    name="category" value={form.category} onChange={handleChange} required
-                    className="w-full border border-gray-200 rounded-2xl px-5 py-4 focus:outline-none focus:border-pink-500"
-                  >
-                    <option value="">Select Category</option>
-                    <option>Clothing</option>
-                    <option>Jewellery</option>
-                    <option>Home Decor</option>
-                    <option>Food & Beverages</option>
-                    <option>Handicrafts</option>
-                    <option>Cosmetics</option>
-                    <option>Kids Products</option>
-                    <option>Accessories</option>
-                    <option>Other</option>
-                  </select>
+                  <label className="font-semibold text-[#1e2a55] block mb-2">
+                    Product Category *
+                  </label>
+
+                  {!selectedExhibition ? (
+                    <div className="w-full border border-gray-200 rounded-2xl px-5 py-4 text-sm text-gray-400 bg-gray-50">
+                      Select an exhibition above to see available categories.
+                    </div>
+                  ) : categoryLimits.length === 0 ? (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-2xl px-5 py-4 text-sm text-yellow-700 font-medium">
+                      No categories have been configured for this exhibition yet.
+                    </div>
+                  ) : (
+                    <>
+                      <select
+                        name="category"
+                        value={form.category}
+                        onChange={handleChange}
+                        required
+                        className="w-full border border-gray-200 rounded-2xl px-5 py-4 focus:outline-none focus:border-pink-500"
+                      >
+                        <option value="">Select Category</option>
+                        {categoryLimits.map((cat) => {
+                          const remaining = getRemainingSlots(cat.category, cat.maxSlots);
+                          const isFull    = remaining <= 0;
+                          return (
+                            <option
+                              key={cat.category}
+                              value={cat.category}
+                              disabled={isFull}
+                            >
+                              {isFull
+                                ? `${cat.category} (FULL)`
+                                : loadingCategorySlots
+                                  ? cat.category
+                                  : `${cat.category} (${categorySlots[cat.category] ?? 0} / ${cat.maxSlots} filled)`}
+                            </option>
+                          );
+                        })}
+                      </select>
+
+                      {/* Remaining slots summary */}
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {categoryLimits.map((cat) => {
+                          const remaining = getRemainingSlots(cat.category, cat.maxSlots);
+                          const isFull    = remaining <= 0;
+                          return (
+                            <span
+                              key={cat.category}
+                              className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${
+                                isFull
+                                  ? "bg-red-50 text-red-500 border-red-200"
+                                  : "bg-green-50 text-green-600 border-green-200"
+                              }`}
+                            >
+                              {cat.category} —{" "}
+                              {isFull
+                                ? "FULL"
+                                : `${remaining} slot${remaining !== 1 ? "s" : ""} left`}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="mt-6">
@@ -588,7 +715,7 @@ function BookStallContent() {
 
                 <button
                   type="submit"
-                  disabled={loading || !selectedExhibition || !transactionId.trim() || !paymentScreenshot}
+                  disabled={loading || !selectedExhibition || !form.category || !transactionId.trim() || !paymentScreenshot}
                   className="w-full mt-8 py-4 rounded-2xl text-white font-semibold text-lg bg-gradient-to-r from-pink-500 to-purple-600 hover:scale-[1.01] transition disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
                   {loading ? "Submitting..." : "Submit Booking & Payment Proof"}
@@ -599,7 +726,12 @@ function BookStallContent() {
                     Please select an exhibition above to continue.
                   </p>
                 )}
-                {selectedExhibition && (!transactionId.trim() || !paymentScreenshot) && (
+                {selectedExhibition && !form.category && (
+                  <p className="text-center text-xs text-gray-400 mt-3">
+                    Please select a product category to continue.
+                  </p>
+                )}
+                {selectedExhibition && form.category && (!transactionId.trim() || !paymentScreenshot) && (
                   <p className="text-center text-xs text-gray-400 mt-3">
                     Complete the payment and upload proof above to enable submission.
                   </p>

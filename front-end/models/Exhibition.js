@@ -1,5 +1,21 @@
 import mongoose from "mongoose";
 
+const CategoryLimitSchema = new mongoose.Schema(
+  {
+    category: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    maxSlots: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+  },
+  { _id: false }
+);
+
 const ExhibitionSchema = new mongoose.Schema(
   {
     title: {
@@ -55,6 +71,14 @@ const ExhibitionSchema = new mongoose.Schema(
 
     gallery: {
       type: [String],
+      default: [],
+    },
+
+    // Per-exhibition vendor categories and their stall slot limits.
+    // Replaces the old hardcoded category dropdown — admin defines
+    // categories and capacity individually for each exhibition.
+    categoryLimits: {
+      type: [CategoryLimitSchema],
       default: [],
     },
   },

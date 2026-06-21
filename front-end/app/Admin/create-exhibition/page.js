@@ -10,6 +10,9 @@ import {
   FaAlignLeft,
   FaCheckCircle,
   FaRupeeSign,
+  FaPlus,
+  FaTrash,
+  FaTags,
 } from "react-icons/fa";
 import { MdOutlineTitle } from "react-icons/md";
 
@@ -27,6 +30,7 @@ export default function CreateExhibition() {
     gallery:        [],
     entryCost:      "",
     extraTableCost: "",
+    categoryLimits: [{ category: "", maxSlots: "" }],
   });
 
   const convertToBase64 = (file) =>
@@ -54,8 +58,59 @@ export default function CreateExhibition() {
     setForm((prev) => ({ ...prev, gallery: images }));
   };
 
+  // ── Category Limit Handlers ─────────────────────────────────────────
+  const handleCategoryChange = (index, field, value) => {
+    setForm((prev) => {
+      const updated = [...prev.categoryLimits];
+      updated[index] = { ...updated[index], [field]: value };
+      return { ...prev, categoryLimits: updated };
+    });
+  };
+
+  const addCategoryRow = () => {
+    setForm((prev) => ({
+      ...prev,
+      categoryLimits: [...prev.categoryLimits, { category: "", maxSlots: "" }],
+    }));
+  };
+
+  const removeCategoryRow = (index) => {
+    setForm((prev) => ({
+      ...prev,
+      categoryLimits: prev.categoryLimits.filter((_, i) => i !== index),
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // ── Validate category rows before sending ──────────────────────────
+    const cleanedCategories = form.categoryLimits
+      .map((c) => ({
+        category: c.category.trim(),
+        maxSlots: Number(c.maxSlots),
+      }))
+      .filter((c) => c.category !== "" || !Number.isNaN(c.maxSlots));
+
+    const hasEmptyName = cleanedCategories.some((c) => c.category === "");
+    if (hasEmptyName) {
+      alert("Every category row needs a category name.");
+      return;
+    }
+
+    const hasInvalidSlots = cleanedCategories.some(
+      (c) => !Number.isFinite(c.maxSlots) || c.maxSlots <= 0
+    );
+    if (hasInvalidSlots) {
+      alert("Max Slots must be a number greater than zero for every category.");
+      return;
+    }
+
+    if (cleanedCategories.length === 0) {
+      alert("Please add at least one category with a slot limit.");
+      return;
+    }
+
     try {
       setLoading(true);
       const res = await fetch("/api/exhibitions", {
@@ -65,6 +120,7 @@ export default function CreateExhibition() {
           ...form,
           entryCost:      Number(form.entryCost)      || 0,
           extraTableCost: Number(form.extraTableCost) || 0,
+          categoryLimits: cleanedCategories,
         }),
       });
       const data = await res.json();
@@ -74,6 +130,7 @@ export default function CreateExhibition() {
         title: "", location: "", date: "", time: "",
         description: "", status: "coming-soon",
         image: "", gallery: [], entryCost: "", extraTableCost: "",
+        categoryLimits: [{ category: "", maxSlots: "" }],
       });
     } catch (error) {
       console.error(error);
@@ -290,10 +347,75 @@ export default function CreateExhibition() {
             </div>
           </div>
 
-          {/* Section 4: Images */}
+          {/* Section 4: Category Slots */}
           <div className="bg-white rounded-2xl shadow-md border border-pink-100 p-6 md:p-8">
             <h2 className="text-base font-semibold text-[#1e2a55] mb-5 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 text-white text-xs flex items-center justify-center font-bold">4</span>
+              Vendor Categories & Slot Limits
+            </h2>
+
+            <p className="text-sm text-gray-500 mb-5 flex items-start gap-2">
+              <FaTags className="text-pink-400 mt-0.5 flex-shrink-0" />
+              Define the categories vendors can choose from for this exhibition,
+              and the maximum number of stalls allowed per category.
+            </p>
+
+            <div className="space-y-3">
+              {/* Column headers */}
+              <div className="grid grid-cols-[1fr_120px_40px] gap-3 px-1">
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                  Category Name
+                </span>
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                  Max Slots
+                </span>
+                <span />
+              </div>
+
+              {form.categoryLimits.map((row, index) => (
+                <div key={index} className="grid grid-cols-[1fr_120px_40px] gap-3 items-center">
+                  <input
+                    type="text"
+                    placeholder="e.g. Clothing"
+                    value={row.category}
+                    onChange={(e) => handleCategoryChange(index, "category", e.target.value)}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100 transition"
+                  />
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="e.g. 2"
+                    value={row.maxSlots}
+                    onChange={(e) => handleCategoryChange(index, "maxSlots", e.target.value)}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100 transition"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeCategoryRow(index)}
+                    disabled={form.categoryLimits.length === 1}
+                    className="w-9 h-9 rounded-xl flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent flex-shrink-0"
+                    aria-label="Remove category"
+                  >
+                    <FaTrash className="text-sm" />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={addCategoryRow}
+              className="mt-4 flex items-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-pink-300 text-pink-600 text-sm font-semibold hover:bg-pink-50 transition"
+            >
+              <FaPlus className="text-xs" />
+              Add Category
+            </button>
+          </div>
+
+          {/* Section 5: Images */}
+          <div className="bg-white rounded-2xl shadow-md border border-pink-100 p-6 md:p-8">
+            <h2 className="text-base font-semibold text-[#1e2a55] mb-5 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 text-white text-xs flex items-center justify-center font-bold">5</span>
               Images
             </h2>
 
