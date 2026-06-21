@@ -28,19 +28,25 @@ const PaymentSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    transactionId: {
+
+    // ── Razorpay fields ──────────────────────────────────────────────────
+    razorpayOrderId: {
       type: String,
       required: true,
-      trim: true,
     },
-    paymentScreenshot: {
-      type: String, // base64 or URL
-      required: true,
+    razorpayPaymentId: {
+      type: String,
+      default: "",
     },
+    razorpaySignature: {
+      type: String,
+      default: "",
+    },
+
     paymentStatus: {
       type: String,
-      enum: ["Pending Verification", "Paid", "Rejected"],
-      default: "Pending Verification",
+      enum: ["Created", "Paid", "Failed", "Refunded"],
+      default: "Created",
     },
   },
   {

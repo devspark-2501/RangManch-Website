@@ -9,38 +9,17 @@ import {
   FaPhone,
   FaStore,
   FaTag,
-  FaInstagram,
   FaBoxOpen,
   FaRupeeSign,
   FaCheckCircle,
-  FaTimesCircle,
   FaReceipt,
-  FaSpinner,
 } from "react-icons/fa";
-
-// ── Status badge helper ───────────────────────────────────────────────────
-function PaymentBadge({ status }) {
-  const map = {
-    "Pending Verification": "bg-yellow-100 text-yellow-700",
-    "Paid":                 "bg-green-100  text-green-700",
-    "Rejected":             "bg-red-100    text-red-600",
-  };
-  return (
-    <span className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${map[status] ?? "bg-gray-100 text-gray-600"}`}>
-      {status ?? "—"}
-    </span>
-  );
-}
 
 function BookingStatusBadge({ status }) {
   const map = {
-    "Pending Payment Verification": "bg-yellow-100 text-yellow-700",
-    "Confirmed":                    "bg-green-100  text-green-700",
-    "Payment Rejected":             "bg-red-100    text-red-600",
-    "Pending":                      "bg-gray-100   text-gray-600",
-    "Approved":                     "bg-blue-100   text-blue-700",
-    "Rejected":                     "bg-red-100    text-red-600",
-    "Paid":                         "bg-green-100  text-green-700",
+    "Confirmed":  "bg-green-100 text-green-700",
+    "Pending":    "bg-yellow-100 text-yellow-700",
+    "Cancelled":  "bg-red-100 text-red-600",
   };
   return (
     <span className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${map[status] ?? "bg-gray-100 text-gray-600"}`}>
@@ -49,16 +28,26 @@ function BookingStatusBadge({ status }) {
   );
 }
 
-export default function AdminBookings() {
-  const [bookings,  setBookings]  = useState([]);
-  const [payments,  setPayments]  = useState([]);
-  const [loading,   setLoading]   = useState(true);
-  const [error,     setError]     = useState(null);
-  const [search,    setSearch]    = useState("");
-  const [actionLoading, setActionLoading] = useState(null); // paymentId being actioned
+function PaymentStatusBadge({ status }) {
+  const map = {
+    "Paid":     "bg-green-100 text-green-700",
+    "Created":  "bg-yellow-100 text-yellow-700",
+    "Failed":   "bg-red-100 text-red-600",
+    "Refunded": "bg-blue-100 text-blue-700",
+  };
+  return (
+    <span className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${map[status] ?? "bg-gray-100 text-gray-600"}`}>
+      {status ?? "—"}
+    </span>
+  );
+}
 
-  // Screenshot preview modal
-  const [previewImg, setPreviewImg] = useState(null);
+export default function AdminBookings() {
+  const [bookings, setBookings] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [loading,  setLoading]  = useState(true);
+  const [error,    setError]    = useState(null);
+  const [search,   setSearch]   = useState("");
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -82,7 +71,7 @@ export default function AdminBookings() {
     fetchAll();
   }, []);
 
-  // ── Build merged rows: one row per booking, with its payment attached ──
+  // Merge: one row per booking, payment attached
   const rows = useMemo(() => {
     return bookings.map((b) => {
       const payment = payments.find(
@@ -97,9 +86,9 @@ export default function AdminBookings() {
     if (!q) return rows;
     return rows.filter(
       (r) =>
-        r.vendorName?.toLowerCase().includes(q)    ||
-        r.businessName?.toLowerCase().includes(q)  ||
-        r.email?.toLowerCase().includes(q)         ||
+        r.vendorName?.toLowerCase().includes(q)       ||
+        r.businessName?.toLowerCase().includes(q)     ||
+        r.email?.toLowerCase().includes(q)            ||
         r.exhibitionTitle?.toLowerCase().includes(q)
     );
   }, [search, rows]);
@@ -111,41 +100,6 @@ export default function AdminBookings() {
     });
   };
 
-  // ── Approve / Reject handler ──────────────────────────────────────────
-  const handleAction = async (paymentId, action) => {
-    if (!confirm(`${action === "approve" ? "Approve" : "Reject"} this payment?`)) return;
-    setActionLoading(paymentId);
-    try {
-      const res  = await fetch("/api/payment", {
-        method:  "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ paymentId, action }),
-      });
-      const data = await res.json();
-      if (!res.ok) { alert(data.message); return; }
-
-      // Update local payment state
-      setPayments((prev) =>
-        prev.map((p) =>
-          p._id === paymentId ? { ...p, paymentStatus: data.payment.paymentStatus } : p
-        )
-      );
-      // Update local booking status
-      const newBookingStatus = action === "approve" ? "Confirmed" : "Payment Rejected";
-      setBookings((prev) =>
-        prev.map((b) =>
-          b._id === data.payment.bookingId || b._id?.toString() === data.payment.bookingId?.toString()
-            ? { ...b, status: newBookingStatus }
-            : b
-        )
-      );
-    } catch (err) {
-      alert("Action failed: " + err.message);
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
   const totalRevenue = useMemo(() =>
     payments
       .filter((p) => p.paymentStatus === "Paid")
@@ -153,9 +107,9 @@ export default function AdminBookings() {
     [payments]
   );
 
-  const pendingCount = useMemo(() =>
-    payments.filter((p) => p.paymentStatus === "Pending Verification").length,
-    [payments]
+  const confirmedCount = useMemo(() =>
+    bookings.filter((b) => b.status === "Confirmed").length,
+    [bookings]
   );
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -168,12 +122,12 @@ export default function AdminBookings() {
           Stall Bookings
         </h1>
         <p className="text-gray-500 mt-1">
-          All vendor booking requests and payment verifications.
+          All vendor booking requests from Rang Manch exhibitions.
         </p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
         <div className="bg-white rounded-2xl shadow-md border border-pink-100 p-6 flex items-center gap-5">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center flex-shrink-0">
             <FaUsers className="text-white text-2xl" />
@@ -187,25 +141,13 @@ export default function AdminBookings() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-md border border-pink-100 p-6 flex items-center gap-5">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center flex-shrink-0">
-            <FaReceipt className="text-white text-2xl" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 font-medium">Pending Verification</p>
-            <p className="text-4xl font-bold text-[#1e2a55] leading-tight">
-              {loading ? "—" : pendingCount}
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-md border border-pink-100 p-6 flex items-center gap-5">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-400 to-teal-500 flex items-center justify-center flex-shrink-0">
             <FaCheckCircle className="text-white text-2xl" />
           </div>
           <div>
             <p className="text-sm text-gray-500 font-medium">Confirmed</p>
             <p className="text-4xl font-bold text-[#1e2a55] leading-tight">
-              {loading ? "—" : bookings.filter((b) => b.status === "Confirmed").length}
+              {loading ? "—" : confirmedCount}
             </p>
           </div>
         </div>
@@ -299,19 +241,13 @@ export default function AdminBookings() {
                     <span className="flex items-center gap-2"><FaRupeeSign className="text-pink-400" /> Amount</span>
                   </th>
                   <th className="text-left px-5 py-4 font-semibold text-[#1e2a55] whitespace-nowrap">
-                    <span className="flex items-center gap-2"><FaReceipt className="text-pink-400" /> Transaction ID</span>
+                    <span className="flex items-center gap-2"><FaReceipt className="text-pink-400" /> Razorpay Order</span>
                   </th>
                   <th className="text-left px-5 py-4 font-semibold text-[#1e2a55] whitespace-nowrap">
                     Payment Status
                   </th>
                   <th className="text-left px-5 py-4 font-semibold text-[#1e2a55] whitespace-nowrap">
                     Booking Status
-                  </th>
-                  <th className="text-left px-5 py-4 font-semibold text-[#1e2a55] whitespace-nowrap">
-                    Screenshot
-                  </th>
-                  <th className="text-left px-5 py-4 font-semibold text-[#1e2a55] whitespace-nowrap">
-                    Actions
                   </th>
                   <th className="text-left px-5 py-4 font-semibold text-[#1e2a55] whitespace-nowrap">
                     <span className="flex items-center gap-2"><FaCalendarAlt className="text-pink-400" /> Submitted</span>
@@ -358,79 +294,22 @@ export default function AdminBookings() {
                     <td className="px-5 py-4 whitespace-nowrap">
                       <span className="font-bold text-[#1e2a55] flex items-center gap-0.5">
                         <FaRupeeSign className="text-xs text-pink-500" />
-                        {row.payment?.amount?.toLocaleString("en-IN") ??
-                          row.totalAmount?.toLocaleString("en-IN") ?? "—"}
+                        {(row.payment?.amount ?? row.totalAmount)?.toLocaleString("en-IN") ?? "—"}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-gray-600 whitespace-nowrap text-xs font-mono">
-                      {row.payment?.transactionId || "—"}
+                    <td className="px-5 py-4 whitespace-nowrap">
+                      <span className="text-gray-500 text-xs font-mono">
+                        {row.payment?.razorpayOrderId
+                          ? row.payment.razorpayOrderId.slice(0, 16) + "…"
+                          : "—"}
+                      </span>
                     </td>
                     <td className="px-5 py-4 whitespace-nowrap">
-                      <PaymentBadge status={row.payment?.paymentStatus} />
+                      <PaymentStatusBadge status={row.payment?.paymentStatus} />
                     </td>
                     <td className="px-5 py-4 whitespace-nowrap">
                       <BookingStatusBadge status={row.status} />
                     </td>
-
-                    {/* Screenshot preview */}
-                    <td className="px-5 py-4 whitespace-nowrap">
-                      {row.payment?.paymentScreenshot ? (
-                        <button
-                          onClick={() => setPreviewImg(row.payment.paymentScreenshot)}
-                          className="group relative"
-                        >
-                          <img
-                            src={row.payment.paymentScreenshot}
-                            alt="Payment proof"
-                            className="w-12 h-12 object-cover rounded-lg border border-pink-100 shadow-sm group-hover:scale-110 transition"
-                          />
-                          <span className="absolute -top-1 -right-1 w-4 h-4 bg-pink-500 rounded-full text-white text-[9px] flex items-center justify-center font-bold">
-                            ↗
-                          </span>
-                        </button>
-                      ) : (
-                        <span className="text-gray-400 text-xs">No proof</span>
-                      )}
-                    </td>
-
-                    {/* Actions */}
-                    <td className="px-5 py-4 whitespace-nowrap">
-                      {row.payment && row.payment.paymentStatus === "Pending Verification" ? (
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleAction(row.payment._id, "approve")}
-                            disabled={actionLoading === row.payment._id}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition text-xs font-semibold disabled:opacity-50"
-                          >
-                            {actionLoading === row.payment._id ? (
-                              <FaSpinner className="animate-spin text-xs" />
-                            ) : (
-                              <FaCheckCircle className="text-xs" />
-                            )}
-                            Approve
-                          </button>
-                          <button
-                            onClick={() => handleAction(row.payment._id, "reject")}
-                            disabled={actionLoading === row.payment._id}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition text-xs font-semibold disabled:opacity-50"
-                          >
-                            {actionLoading === row.payment._id ? (
-                              <FaSpinner className="animate-spin text-xs" />
-                            ) : (
-                              <FaTimesCircle className="text-xs" />
-                            )}
-                            Reject
-                          </button>
-                        </div>
-                      ) : (
-                        <span className="text-gray-400 text-xs italic">
-                          {row.payment
-                            ? row.payment.paymentStatus === "Paid" ? "✓ Approved" : "✗ Rejected"
-                            : "No payment"}
-                        </span>
-                      )}
-                    </td>
-
                     <td className="px-5 py-4 text-gray-500 whitespace-nowrap">
                       {formatDate(row.createdAt)}
                     </td>
@@ -445,29 +324,6 @@ export default function AdminBookings() {
           </div>
         )}
       </div>
-
-      {/* Screenshot Preview Modal */}
-      {previewImg && (
-        <div
-          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
-          onClick={() => setPreviewImg(null)}
-        >
-          <div className="relative max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={() => setPreviewImg(null)}
-              className="absolute -top-10 right-0 text-white/70 hover:text-white text-sm font-medium"
-            >
-              ✕ Close
-            </button>
-            <img
-              src={previewImg}
-              alt="Payment screenshot"
-              className="w-full rounded-2xl shadow-2xl"
-            />
-          </div>
-        </div>
-      )}
     </div>
-    
   );
 }

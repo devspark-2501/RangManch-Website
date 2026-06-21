@@ -1,140 +1,18 @@
-import { connectDB } from "@/lib/mongodb";
-import Booking from "@/models/Booking";
-import Payment from "@/models/Payment";
-import Exhibition from "@/models/Exhibition";
+// This route is now a no-op stub kept for backwards compatibility only.
+// All booking creation is handled by:
+//   POST /api/razorpay/create-order   — create Razorpay order + capacity check
+//   POST /api/razorpay/verify-payment — verify signature + create Booking + Payment
+//
+// Do NOT delete this file — removing the route would cause 404 errors on
+// any cached or bookmarked old requests. It simply returns a redirect hint.
 
-// Statuses that count toward a category's capacity.
-const CAPACITY_STATUSES = ["Pending Payment Verification", "Confirmed"];
-
-export async function POST(req) {
-  try {
-    await connectDB();
-
-    const body = await req.json();
-
-    // ── Validate required fields ─────────────────────────────────────────
-    if (!body.exhibitionId) {
-      return Response.json(
-        { success: false, message: "Please select an exhibition." },
-        { status: 400 }
-      );
-    }
-    if (!body.category?.trim()) {
-      return Response.json(
-        { success: false, message: "Please select a product category." },
-        { status: 400 }
-      );
-    }
-    if (!body.transactionId?.trim()) {
-      return Response.json(
-        { success: false, message: "Transaction ID (UTR Number) is required." },
-        { status: 400 }
-      );
-    }
-    if (!body.paymentScreenshot) {
-      return Response.json(
-        { success: false, message: "Payment screenshot is required." },
-        { status: 400 }
-      );
-    }
-
-    // ── Fetch exhibition from DB — never trust frontend pricing ──────────
-    const exhibition = await Exhibition.findById(body.exhibitionId).lean();
-    if (!exhibition) {
-      return Response.json(
-        { success: false, message: "Exhibition not found." },
-        { status: 404 }
-      );
-    }
-    if (exhibition.status !== "open") {
-      return Response.json(
-        { success: false, message: "This exhibition is not open for bookings." },
-        { status: 400 }
-      );
-    }
-
-    // ── Validate category against exhibition's own categoryLimits ───────
-    const categoryDef = (exhibition.categoryLimits ?? []).find(
-      (c) => c.category === body.category
-    );
-    if (!categoryDef) {
-      return Response.json(
-        { success: false, message: "Selected category is not valid for this exhibition." },
-        { status: 400 }
-      );
-    }
-
-    // ── Capacity check — count existing bookings for this exhibition +
-    // category, restricted to statuses that count toward capacity ───────
-    const existingCount = await Booking.countDocuments({
-      exhibitionId: exhibition._id,
-      category:     body.category,
-      status:       { $in: CAPACITY_STATUSES },
-    });
-
-    if (existingCount >= categoryDef.maxSlots) {
-      return Response.json(
-        {
-          success: false,
-          message: "This category is already full for the selected exhibition.",
-        },
-        { status: 400 }
-      );
-    }
-
-    // ── Sanitize extraTableCount ─────────────────────────────────────────
-    const rawCount        = Number(body.extraTableCount);
-    const extraTableCount =
-      Number.isFinite(rawCount) && rawCount >= 0 ? Math.floor(rawCount) : 0;
-
-    // ── Server-side pricing calculation ──────────────────────────────────
-    const entryCost      = exhibition.entryCost      ?? 0;
-    const extraTableCost = exhibition.extraTableCost ?? 0;
-    const totalAmount    = entryCost + extraTableCost * extraTableCount;
-
-    // ── Create Booking ───────────────────────────────────────────────────
-    const booking = await Booking.create({
-      vendorName:         body.vendorName,
-      businessName:       body.businessName,
-      mobile:             body.mobile,
-      email:              body.email,
-      category:           body.category,
-      products:           body.products   ?? "",
-      social:             body.social     ?? "",
-      terms:              body.terms      ?? false,
-      status:             "Pending Payment Verification",
-      exhibitionId:       exhibition._id,
-      exhibitionTitle:    exhibition.title,
-      exhibitionDate:     exhibition.date     ?? "",
-      exhibitionLocation: exhibition.location ?? "",
-      entryCost,
-      extraTableCost,
-      extraTableCount,
-      totalAmount,
-    });
-
-    // ── Create Payment linked to Booking ─────────────────────────────────
-    const payment = await Payment.create({
-      bookingId:         booking._id,
-      exhibitionId:      exhibition._id,
-      vendorName:        body.vendorName,
-      email:             body.email,
-      mobile:            body.mobile,
-      amount:            totalAmount,
-      transactionId:     body.transactionId.trim(),
-      paymentScreenshot: body.paymentScreenshot,
-      paymentStatus:     "Pending Verification",
-    });
-
-    return Response.json(
-      { success: true, booking, payment },
-      { status: 201 }
-    );
-  } catch (error) {
-    console.error("POST /api/book-stall error:", error);
-    return Response.json(
-      { success: false, message: error.message },
-      { status: 500 }
-    );
-  }
+export async function POST() {
+  return Response.json(
+    {
+      success: false,
+      message:
+        "This endpoint is deprecated. Use /api/razorpay/create-order and /api/razorpay/verify-payment.",
+    },
+    { status: 410 }
+  );
 }

@@ -34,19 +34,10 @@ const BookingSchema = new mongoose.Schema(
       default: false,
     },
 
-    // Updated to reflect payment-aware statuses
     status: {
       type: String,
-      enum: [
-        "Pending Payment Verification",
-        "Confirmed",
-        "Payment Rejected",
-        "Pending",
-        "Approved",
-        "Rejected",
-        "Paid",
-      ],
-      default: "Pending Payment Verification",
+      enum: ["Pending", "Confirmed", "Cancelled"],
+      default: "Pending",
     },
 
     // ── Exhibition Link ──────────────────────────────────────────────────
