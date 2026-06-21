@@ -468,5 +468,6 @@ export default function AdminBookings() {
         </div>
       )}
     </div>
+    
   );
 }
