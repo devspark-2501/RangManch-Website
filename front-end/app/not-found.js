@@ -47,6 +47,7 @@ export default function NotFound() {
         <p className="mt-6 text-xs text-gray-400">
           Error Code: RM-404
         </p>
+        
 
       </div>
     </section>
