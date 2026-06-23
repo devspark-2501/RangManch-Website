@@ -1,13 +1,22 @@
+// app/api/payment/route.js
+//
+// FIX: export const dynamic = "force-dynamic" added.
+// Same static-cache issue as /api/Admin/bookings — Vercel would freeze
+// the payment list at deploy time without this directive.
+
+export const dynamic    = "force-dynamic";
+export const revalidate = 0;
+
 import { connectDB } from "@/lib/mongodb";
 import Payment from "@/models/Payment";
 
-// GET — return all payments (admin use). Read-only: payment status is now
-// set exclusively by /api/razorpay/verify-payment (and, in future, by a
-// Razorpay webhook for async events like refunds/failures). This route no
-// longer accepts writes.
+// GET — returns all payments as a flat array.
+// Read-only: payment status is set exclusively by
+// /api/razorpay/verify-payment (and future Razorpay webhooks).
 export async function GET() {
   try {
     await connectDB();
+
     const payments = await Payment.find()
       .sort({ createdAt: -1 })
       .lean();

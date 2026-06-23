@@ -1,3 +1,11 @@
+// app/Admin/bookings/page.js
+//
+// FIX: Added cache: "no-store" to both fetch calls.
+// Without this the browser treats GET /api/Admin/bookings and GET /api/payment
+// as regular HTTP GET requests and may serve a cached response from a
+// previous visit — especially on mobile browsers and on Vercel's edge cache.
+// "no-store" forces a network request every time the page mounts.
+
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -17,9 +25,9 @@ import {
 
 function BookingStatusBadge({ status }) {
   const map = {
-    "Confirmed":  "bg-green-100 text-green-700",
-    "Pending":    "bg-yellow-100 text-yellow-700",
-    "Cancelled":  "bg-red-100 text-red-600",
+    "Confirmed": "bg-green-100 text-green-700",
+    "Pending":   "bg-yellow-100 text-yellow-700",
+    "Cancelled": "bg-red-100 text-red-600",
   };
   return (
     <span className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${map[status] ?? "bg-gray-100 text-gray-600"}`}>
@@ -53,15 +61,24 @@ export default function AdminBookings() {
     const fetchAll = async () => {
       try {
         setLoading(true);
+
+        // FIX: cache: "no-store" on both calls prevents browser and CDN
+        // from serving stale GET responses.
         const [bRes, pRes] = await Promise.all([
-          fetch("/api/Admin/bookings"),
-          fetch("/api/payment"),
+          fetch("/api/Admin/bookings", { cache: "no-store" }),
+          fetch("/api/payment",        { cache: "no-store" }),
         ]);
+
         if (!bRes.ok) throw new Error("Failed to fetch bookings");
         if (!pRes.ok) throw new Error("Failed to fetch payments");
+
         const [bData, pData] = await Promise.all([bRes.json(), pRes.json()]);
-        setBookings(bData);
-        setPayments(pData);
+
+        // bData → Array<Booking>   (from /api/Admin/bookings)
+        // pData → Array<Payment>   (from /api/payment)
+        // Both are flat arrays — shapes are consistent.
+        setBookings(Array.isArray(bData) ? bData : []);
+        setPayments(Array.isArray(pData) ? pData : []);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -71,11 +88,13 @@ export default function AdminBookings() {
     fetchAll();
   }, []);
 
-  // Merge: one row per booking, payment attached
+  // Merge: one row per booking, payment attached by bookingId
   const rows = useMemo(() => {
     return bookings.map((b) => {
       const payment = payments.find(
-        (p) => p.bookingId === b._id || p.bookingId?.toString() === b._id?.toString()
+        (p) =>
+          p.bookingId === b._id ||
+          p.bookingId?.toString() === b._id?.toString()
       ) ?? null;
       return { ...b, payment };
     });
@@ -86,9 +105,9 @@ export default function AdminBookings() {
     if (!q) return rows;
     return rows.filter(
       (r) =>
-        r.vendorName?.toLowerCase().includes(q)       ||
-        r.businessName?.toLowerCase().includes(q)     ||
-        r.email?.toLowerCase().includes(q)            ||
+        r.vendorName?.toLowerCase().includes(q)      ||
+        r.businessName?.toLowerCase().includes(q)    ||
+        r.email?.toLowerCase().includes(q)           ||
         r.exhibitionTitle?.toLowerCase().includes(q)
     );
   }, [search, rows]);
@@ -209,7 +228,9 @@ export default function AdminBookings() {
               {search ? "No bookings match your search." : "No Bookings Found"}
             </p>
             <p className="text-sm mt-1">
-              {search ? "Try a different keyword." : "Booking requests will appear here once vendors submit."}
+              {search
+                ? "Try a different keyword."
+                : "Booking requests will appear here once vendors submit."}
             </p>
           </div>
         )}
